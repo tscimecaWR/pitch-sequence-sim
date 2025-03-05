@@ -53,6 +53,10 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				purple: {
+					DEFAULT: '#8D0EFF',  // Normal state
+					hover: '#A541FF',    // Hover state
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -135,7 +135,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
               <Button 
                 onClick={handleCopyRecommendation}
                 className="flex items-center gap-2"
-                variant="secondary"
+                variant="default"
               >
                 <Copy size={16} />
                 Use This Recommendation
