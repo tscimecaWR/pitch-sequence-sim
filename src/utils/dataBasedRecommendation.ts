@@ -10,6 +10,15 @@ export interface HistoricalPitchData {
   pitcherHandedness: PitcherHandedness;
   result: 'Successful' | 'Unsuccessful';  // Simplified outcome (strike/out vs ball/hit)
   situationId?: string;  // Optional identifier for specific game situations
+  metadata?: {  // Additional data from the CSV schema
+    date?: string;
+    pitcher?: string;
+    velocity?: number;
+    spinRate?: number;
+    horizontalBreak?: number;
+    verticalBreak?: number;
+    [key: string]: any;  // Allow for additional metadata fields
+  };
 }
 
 // Sample data - would be replaced with actual dataset

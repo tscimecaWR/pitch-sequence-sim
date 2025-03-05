@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,17 +16,17 @@ const DataUploader = () => {
     timestamp: number;
   } | null>(null);
 
-  const sampleCsvContent = `type,location,balls,strikes,batterHandedness,pitcherHandedness,result
-Fastball,High Inside,0,0,Right,Right,Successful
-Slider,Low Outside,1,2,Left,Right,Successful
-Changeup,Low Middle,3,2,Right,Left,Unsuccessful`;
+  const sampleCsvContent = `Date,Pitcher,PitchType,Velo,SpinRate,HorizBreak,VertBreak,PitchResult,Zone,Count,BatterSide,PitcherThrows
+4/15/2023,John Smith,Fastball,93.2,2400,6.2,-12.1,Strike,Middle Middle,0-1,Right,Right
+4/15/2023,John Smith,Slider,86.1,2700,-8.4,2.3,Ball,Low Outside,1-2,Left,Right
+4/15/2023,John Smith,Changeup,84.5,1800,8.7,5.6,Hit,Middle Middle,2-1,Right,Right`;
 
   const parseCSV = (csvText: string) => {
     const lines = csvText.split('\n');
     if (lines.length < 2) throw new Error('CSV must have headers and at least one data row');
     
     const headers = lines[0].split(',').map(h => h.trim());
-    const requiredHeaders = ['type', 'location', 'balls', 'strikes', 'batterHandedness', 'pitcherHandedness', 'result'];
+    const requiredHeaders = ['Date', 'Pitcher', 'PitchType', 'Velo', 'SpinRate', 'HorizBreak', 'VertBreak', 'PitchResult', 'Zone', 'Count', 'BatterSide', 'PitcherThrows'];
     
     // Check if all required headers are present
     const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
@@ -51,17 +52,56 @@ Changeup,Low Middle,3,2,Right,Left,Unsuccessful`;
         rowData[header] = values[index];
       });
       
+      // Parse the count (format: "1-2" to { balls: 1, strikes: 2 })
+      const countParts = rowData.Count.split('-');
+      const balls = parseInt(countParts[0], 10);
+      const strikes = parseInt(countParts[1], 10);
+      
+      // Map PitchType to our application's type
+      const pitchTypeMap: Record<string, string> = {
+        'Fastball': 'Fastball',
+        'Curveball': 'Curveball',
+        'Slider': 'Slider',
+        'Changeup': 'Changeup',
+        'Cutter': 'Cutter',
+        'Sinker': 'Sinker',
+        'Splitter': 'Splitter',
+        // Add any additional mappings needed
+      };
+      
+      // Map PitchResult to our application's result format
+      const resultMap: Record<string, string> = {
+        'Strike': 'Successful',
+        'Swinging Strike': 'Successful',
+        'Called Strike': 'Successful',
+        'Foul': 'Successful',
+        'In Play Out': 'Successful',
+        'Ball': 'Unsuccessful',
+        'Hit': 'Unsuccessful',
+        'Home Run': 'Unsuccessful',
+        // Add any additional mappings needed
+      };
+      
       // Format the data to match HistoricalPitchData structure
       data.push({
-        type: rowData.type,
-        location: rowData.location,
+        type: pitchTypeMap[rowData.PitchType] || rowData.PitchType,
+        location: rowData.Zone,
         count: { 
-          balls: parseInt(rowData.balls, 10), 
-          strikes: parseInt(rowData.strikes, 10) 
+          balls: balls, 
+          strikes: strikes 
         },
-        batterHandedness: rowData.batterHandedness,
-        pitcherHandedness: rowData.pitcherHandedness,
-        result: rowData.result
+        batterHandedness: rowData.BatterSide,
+        pitcherHandedness: rowData.PitcherThrows,
+        result: resultMap[rowData.PitchResult] || 'Unsuccessful',
+        // Additional fields that might be useful
+        metadata: {
+          date: rowData.Date,
+          pitcher: rowData.Pitcher,
+          velocity: parseFloat(rowData.Velo),
+          spinRate: parseInt(rowData.SpinRate, 10),
+          horizontalBreak: parseFloat(rowData.HorizBreak),
+          verticalBreak: parseFloat(rowData.VertBreak)
+        }
       });
     }
     
