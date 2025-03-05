@@ -67,7 +67,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
             className="flex items-center gap-2"
           >
             <FlipHorizontal size={16} />
-            {batterHandedness === 'Right' ? 'Right-handed' : 'Left-handed'}
+            {batterHandedness === 'Right' ? 'Right handed batter' : 'Left handed batter'}
           </Button>
         </CardTitle>
       </CardHeader>
