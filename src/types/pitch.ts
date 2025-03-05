@@ -8,6 +8,8 @@ export type PitchType =
   | 'Sinker'
   | 'Splitter';
 
+export type BatterHandedness = 'Right' | 'Left';
+
 export type PitchLocation = 
   // Strike zone (3x3 inner grid)
   | 'High Inside'
@@ -54,4 +56,5 @@ export interface Pitch {
     };
   };
   atBatResult?: string;
+  batterHandedness?: BatterHandedness;
 }

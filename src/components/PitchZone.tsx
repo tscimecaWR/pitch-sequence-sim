@@ -1,20 +1,48 @@
 
 import React from 'react';
-import { PitchLocation } from '../types/pitch';
+import { PitchLocation, BatterHandedness } from '../types/pitch';
 import { cn } from '@/lib/utils';
 
 interface PitchZoneProps {
   selectedLocation?: PitchLocation;
   onSelectLocation: (location: PitchLocation) => void;
   className?: string;
+  batterHandedness: BatterHandedness;
 }
 
 const PitchZone: React.FC<PitchZoneProps> = ({ 
   selectedLocation, 
   onSelectLocation,
-  className
+  className,
+  batterHandedness = 'Right' // Default to right-handed
 }) => {
-  // Full 5x5 grid layout
+  // Function to get the display location based on handedness
+  const getDisplayLocation = (location: PitchLocation): string => {
+    if (batterHandedness === 'Right') {
+      return location;
+    } else {
+      // For left-handed batters, invert inside/outside
+      return location
+        .replace('Inside', 'TEMP')
+        .replace('Outside', 'Inside')
+        .replace('TEMP', 'Outside');
+    }
+  };
+
+  // Get the internal location from display location
+  const getInternalLocation = (displayLocation: string): PitchLocation => {
+    if (batterHandedness === 'Right') {
+      return displayLocation as PitchLocation;
+    } else {
+      // For left-handed batters, invert inside/outside back
+      return displayLocation
+        .replace('Inside', 'TEMP')
+        .replace('Outside', 'Inside')
+        .replace('TEMP', 'Outside') as PitchLocation;
+    }
+  };
+
+  // Full 5x5 grid layout - this is the internal representation, always right-handed
   const grid: Array<Array<PitchLocation | null>> = [
     ['Way High Inside', 'Way High', 'Way High', 'Way High', 'Way High Outside'],
     ['Way Inside', 'High Inside', 'High Middle', 'High Outside', 'Way Outside'],
@@ -40,6 +68,7 @@ const PitchZone: React.FC<PitchZoneProps> = ({
             if (!location) return null;
             
             const isStrike = isStrikeZone(location);
+            const displayLoc = getDisplayLocation(location);
             
             return (
               <button
@@ -53,10 +82,10 @@ const PitchZone: React.FC<PitchZoneProps> = ({
                     : ""
                 )}
                 onClick={() => onSelectLocation(location)}
-                aria-label={`Select ${location} zone`}
+                aria-label={`Select ${displayLoc} zone`}
               >
                 <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-600 opacity-70">
-                  {location.split(' ').map(word => word[0]).join('')}
+                  {displayLoc.split(' ').map(word => word[0]).join('')}
                 </span>
               </button>
             );

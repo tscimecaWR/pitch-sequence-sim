@@ -4,7 +4,7 @@ import PitchInput from '@/components/PitchInput';
 import PitchHistory from '@/components/PitchHistory';
 import PitchRecommendation from '@/components/PitchRecommendation';
 import CountTracker from '@/components/CountTracker';
-import { Pitch, PitchType, PitchLocation } from '@/types/pitch';
+import { Pitch, PitchType, PitchLocation, BatterHandedness } from '@/types/pitch';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
@@ -15,6 +15,7 @@ const Index = () => {
   const [selectedLocation, setSelectedLocation] = useState<PitchLocation>('Middle Middle');
   const [balls, setBalls] = useState<number>(0);
   const [strikes, setStrikes] = useState<number>(0);
+  const [batterHandedness, setBatterHandedness] = useState<BatterHandedness>('Right');
 
   const handleAddPitch = (pitch: Pitch) => {
     // Add count information to the pitch
@@ -135,6 +136,8 @@ const Index = () => {
               selectedLocation={selectedLocation}
               setSelectedType={setSelectedType}
               setSelectedLocation={setSelectedLocation}
+              batterHandedness={batterHandedness}
+              setBatterHandedness={setBatterHandedness}
             />
           </div>
           
@@ -142,6 +145,7 @@ const Index = () => {
             <PitchRecommendation 
               pitches={pitches} 
               onLoadRecommendation={handleLoadRecommendation}
+              batterHandedness={batterHandedness}
             />
             <PitchHistory pitches={pitches} />
           </div>

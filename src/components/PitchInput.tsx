@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pitch, PitchType, PitchLocation, PitchResult } from '../types/pitch';
+import { Pitch, PitchType, PitchLocation, PitchResult, BatterHandedness } from '../types/pitch';
 import { PITCH_TYPES, PITCH_LOCATIONS, PITCH_RESULTS, generateId } from '../utils/pitchUtils';
 import PitchZone from './PitchZone';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { FlipHorizontal } from 'lucide-react';
 
 interface PitchInputProps {
   onAddPitch: (pitch: Pitch) => void;
@@ -15,6 +16,8 @@ interface PitchInputProps {
   selectedLocation: PitchLocation;
   setSelectedType: (type: PitchType) => void;
   setSelectedLocation: (location: PitchLocation) => void;
+  batterHandedness: BatterHandedness;
+  setBatterHandedness: (handedness: BatterHandedness) => void;
 }
 
 const PitchInput: React.FC<PitchInputProps> = ({ 
@@ -22,7 +25,9 @@ const PitchInput: React.FC<PitchInputProps> = ({
   selectedType, 
   selectedLocation, 
   setSelectedType, 
-  setSelectedLocation 
+  setSelectedLocation,
+  batterHandedness,
+  setBatterHandedness
 }) => {
   const [result, setResult] = useState<PitchResult>('Strike');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +40,8 @@ const PitchInput: React.FC<PitchInputProps> = ({
       type: selectedType,
       location: selectedLocation,
       result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      batterHandedness
     };
     
     // Small delay for animation
@@ -45,10 +51,25 @@ const PitchInput: React.FC<PitchInputProps> = ({
     }, 300);
   };
 
+  const toggleHandedness = () => {
+    setBatterHandedness(batterHandedness === 'Right' ? 'Left' : 'Right');
+  };
+
   return (
     <Card className="w-full max-w-md animate-fade-in shadow-custom bg-card/80 backdrop-blur-sm rounded-xl">
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium">Enter Pitch Data</CardTitle>
+        <CardTitle className="text-xl font-medium flex justify-between items-center">
+          <span>Enter Pitch Data</span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={toggleHandedness}
+            className="flex items-center gap-2"
+          >
+            <FlipHorizontal size={16} />
+            {batterHandedness === 'Right' ? 'Right-handed' : 'Left-handed'}
+          </Button>
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-4">
@@ -80,6 +101,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
               selectedLocation={selectedLocation}
               onSelectLocation={setSelectedLocation}
               className="animate-scale-in rounded-lg overflow-hidden shadow-custom"
+              batterHandedness={batterHandedness}
             />
           </div>
         </div>

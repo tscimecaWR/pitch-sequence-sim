@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pitch, PitchType, PitchLocation } from '../types/pitch';
+import { Pitch, PitchType, PitchLocation, BatterHandedness } from '../types/pitch';
 import { recommendNextPitch } from '../utils/pitchUtils';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
@@ -12,11 +12,13 @@ import { Badge } from '@/components/ui/badge';
 interface PitchRecommendationProps {
   pitches: Pitch[];
   onLoadRecommendation: (type: PitchType, location: PitchLocation) => void;
+  batterHandedness: BatterHandedness;
 }
 
 const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ 
   pitches, 
-  onLoadRecommendation 
+  onLoadRecommendation,
+  batterHandedness
 }) => {
   const [recommendation, setRecommendation] = useState<{ type: PitchType; location: PitchLocation } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -115,6 +117,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                 selectedLocation={recommendation.location}
                 onSelectLocation={() => {}}
                 className="pointer-events-none"
+                batterHandedness={batterHandedness}
               />
             </div>
             
