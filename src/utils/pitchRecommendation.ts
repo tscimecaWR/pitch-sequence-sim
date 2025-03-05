@@ -1,6 +1,11 @@
 
-import { Pitch, PitchType, PitchLocation } from '../types/pitch';
-import { applyCountBasedScoring, applyPatternRecognition, findHighestScoringKey } from './pitchScoring';
+import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
+import { 
+  applyCountBasedScoring, 
+  applyPatternRecognition, 
+  applyHandednessScoring, 
+  findHighestScoringKey 
+} from './pitchScoring';
 
 // Enhanced recommendation logic using weighted scoring system
 export const recommendNextPitch = (pitches: Pitch[]): { type: PitchType; location: PitchLocation } => {
@@ -37,11 +42,18 @@ export const recommendNextPitch = (pitches: Pitch[]): { type: PitchType; locatio
   const lastPitch = pitches[pitches.length - 1];
   const currentCount = lastPitch.count?.after || { balls: 0, strikes: 0 };
 
+  // Get handedness information from the last pitch
+  const batterHandedness = lastPitch.batterHandedness || 'Right';
+  const pitcherHandedness = lastPitch.pitcherHandedness || 'Right';
+
   // 1. Full Count Analysis
   applyCountBasedScoring(pitchTypeScores, locationScores, currentCount);
   
   // 2. Pattern Recognition
   applyPatternRecognition(pitchTypeScores, locationScores, pitches);
+  
+  // 3. NEW: Apply handedness-based recommendations
+  applyHandednessScoring(pitchTypeScores, locationScores, batterHandedness, pitcherHandedness);
 
   // Find best pitch type and location based on scores
   const bestPitchType = findHighestScoringKey(pitchTypeScores);

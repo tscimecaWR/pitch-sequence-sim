@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pitch, PitchType, PitchLocation, BatterHandedness } from '../types/pitch';
+import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
 import { recommendNextPitch } from '../utils/pitchUtils';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
@@ -13,12 +12,14 @@ interface PitchRecommendationProps {
   pitches: Pitch[];
   onLoadRecommendation: (type: PitchType, location: PitchLocation) => void;
   batterHandedness: BatterHandedness;
+  pitcherHandedness: PitcherHandedness;
 }
 
 const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ 
   pitches, 
   onLoadRecommendation,
-  batterHandedness
+  batterHandedness,
+  pitcherHandedness
 }) => {
   const [recommendation, setRecommendation] = useState<{ type: PitchType; location: PitchLocation } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -35,13 +36,18 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     const count = getCurrentCount();
     const { balls, strikes } = count;
     
-    if (strikes === 2) return "Strikeout count";
-    if (balls === 3) return "Avoid walking the batter";
-    if (balls === strikes) return "Even count";
-    if (balls === 0 && strikes === 0) return "First pitch";
-    if (balls > strikes) return "Behind in count";
-    if (strikes > balls) return "Ahead in count";
-    return "";
+    // Add handedness matchup context
+    const handednessMatchup = batterHandedness === pitcherHandedness 
+      ? `Same-side matchup (${pitcherHandedness}-handed pitcher vs ${batterHandedness}-handed batter)`
+      : `Opposite-side matchup (${pitcherHandedness}-handed pitcher vs ${batterHandedness}-handed batter)`;
+    
+    if (strikes === 2) return `Strikeout count - ${handednessMatchup}`;
+    if (balls === 3) return `Avoid walking the batter - ${handednessMatchup}`;
+    if (balls === strikes) return `Even count - ${handednessMatchup}`;
+    if (balls === 0 && strikes === 0) return `First pitch - ${handednessMatchup}`;
+    if (balls > strikes) return `Behind in count - ${handednessMatchup}`;
+    if (strikes > balls) return `Ahead in count - ${handednessMatchup}`;
+    return handednessMatchup;
   };
 
   useEffect(() => {
@@ -51,7 +57,18 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
       
       // Add a small delay to simulate calculation and create a nice animation effect
       const timer = setTimeout(() => {
-        setRecommendation(recommendNextPitch(pitches));
+        // Make sure the latest pitch has the current handedness
+        const updatedPitches = [...pitches];
+        if (updatedPitches.length > 0) {
+          const lastIndex = updatedPitches.length - 1;
+          updatedPitches[lastIndex] = {
+            ...updatedPitches[lastIndex],
+            batterHandedness,
+            pitcherHandedness
+          };
+        }
+        
+        setRecommendation(recommendNextPitch(updatedPitches));
         setIsCalculating(false);
       }, 500);
       
@@ -59,7 +76,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     } else {
       setRecommendation(null);
     }
-  }, [pitches]);
+  }, [pitches, batterHandedness, pitcherHandedness]);
 
   const handleCopyRecommendation = () => {
     if (recommendation) {

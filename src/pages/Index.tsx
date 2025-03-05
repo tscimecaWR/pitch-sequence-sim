@@ -149,6 +149,7 @@ const Index = () => {
               pitches={pitches} 
               onLoadRecommendation={handleLoadRecommendation}
               batterHandedness={batterHandedness}
+              pitcherHandedness={pitcherHandedness}
             />
             <PitchHistory pitches={pitches} />
           </div>
