@@ -9,6 +9,7 @@ export type PitchType =
   | 'Splitter';
 
 export type PitchLocation = 
+  // Strike zone (3x3 inner grid)
   | 'High Inside'
   | 'High Middle'
   | 'High Outside' 
@@ -17,7 +18,16 @@ export type PitchLocation =
   | 'Middle Outside'
   | 'Low Inside'
   | 'Low Middle'
-  | 'Low Outside';
+  | 'Low Outside'
+  // Ball zone (outer ring)
+  | 'Way High Inside'
+  | 'Way High'
+  | 'Way High Outside'
+  | 'Way Inside'
+  | 'Way Outside'
+  | 'Way Low Inside'
+  | 'Way Low'
+  | 'Way Low Outside';
 
 export type PitchResult = 
   | 'Strike' 

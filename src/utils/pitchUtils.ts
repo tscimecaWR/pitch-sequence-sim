@@ -1,3 +1,4 @@
+
 import { Pitch, PitchType, PitchLocation, PitchResult } from '../types/pitch';
 
 // Generate a unique ID
@@ -49,47 +50,73 @@ export const recommendNextPitch = (pitches: Pitch[]): { type: PitchType; locatio
   
   // If last pitch was a ball, try different location with same pitch
   else if (lastPitch.result === 'Ball') {
-    let newLocation: PitchLocation;
+    // Get a location more in the strike zone
+    const strikeZoneLocations: PitchLocation[] = [
+      'High Inside', 'High Middle', 'High Outside',
+      'Middle Inside', 'Middle Middle', 'Middle Outside',
+      'Low Inside', 'Low Middle', 'Low Outside'
+    ];
     
-    // Adjust location to be more in the zone
-    switch (lastPitch.location) {
-      case 'High Inside':
-        newLocation = 'High Middle';
-        break;
-      case 'High Outside':
-        newLocation = 'High Middle';
-        break;
-      case 'Low Inside':
-        newLocation = 'Low Middle';
-        break;
-      case 'Low Outside':
-        newLocation = 'Low Middle';
-        break;
-      case 'Middle Inside':
-        newLocation = 'Middle Middle';
-        break;
-      case 'Middle Outside':
-        newLocation = 'Middle Middle';
-        break;
-      default:
-        newLocation = 'Middle Middle';
+    // If the last pitch was outside the strike zone, move to a nearby strike zone location
+    if (!strikeZoneLocations.includes(lastPitch.location)) {
+      let newLocation: PitchLocation;
+      
+      switch (lastPitch.location) {
+        case 'Way High Inside':
+          newLocation = 'High Inside';
+          break;
+        case 'Way High':
+          newLocation = 'High Middle';
+          break;
+        case 'Way High Outside':
+          newLocation = 'High Outside';
+          break;
+        case 'Way Inside':
+          newLocation = 'Middle Inside';
+          break;
+        case 'Way Outside':
+          newLocation = 'Middle Outside';
+          break;
+        case 'Way Low Inside':
+          newLocation = 'Low Inside';
+          break;
+        case 'Way Low':
+          newLocation = 'Low Middle';
+          break;
+        case 'Way Low Outside':
+          newLocation = 'Low Outside';
+          break;
+        default:
+          newLocation = 'Middle Middle';
+      }
+      
+      return {
+        type: lastPitch.type,
+        location: newLocation
+      };
+    } else {
+      // If already in strike zone, aim for the middle
+      return {
+        type: lastPitch.type,
+        location: 'Middle Middle'
+      };
     }
-    
-    return {
-      type: lastPitch.type,
-      location: newLocation
-    };
   }
   
   // If batter made contact, change both pitch type and location
   else {
     // Logic for when batter made contact
     const pitchTypes: PitchType[] = ['Fastball', 'Curveball', 'Slider', 'Changeup'];
-    const locations: PitchLocation[] = ['Low Outside', 'High Inside', 'Low Inside', 'High Outside'];
+    
+    // For contact, try to move to a tougher location to hit
+    const toughLocations: PitchLocation[] = [
+      'High Inside', 'Low Inside', 'Low Outside', 'High Outside',
+      'Way Inside', 'Way Outside', 'Way High', 'Way Low'
+    ];
     
     // Don't use the same pitch that was hit
     const availablePitches = pitchTypes.filter(type => type !== lastPitch.type);
-    const availableLocations = locations.filter(loc => loc !== lastPitch.location);
+    const availableLocations = toughLocations.filter(loc => loc !== lastPitch.location);
     
     const randomPitchIndex = Math.floor(Math.random() * availablePitches.length);
     const randomLocationIndex = Math.floor(Math.random() * availableLocations.length);
@@ -104,6 +131,7 @@ export const recommendNextPitch = (pitches: Pitch[]): { type: PitchType; locatio
 // Data for our visualization
 export const getPitchZoneCoordinates = (location: PitchLocation): { x: number; y: number } => {
   const coordinates: Record<PitchLocation, { x: number; y: number }> = {
+    // Strike zone (3x3 inner grid)
     'High Inside': { x: 25, y: 25 },
     'High Middle': { x: 50, y: 25 },
     'High Outside': { x: 75, y: 25 },
@@ -112,7 +140,16 @@ export const getPitchZoneCoordinates = (location: PitchLocation): { x: number; y
     'Middle Outside': { x: 75, y: 50 },
     'Low Inside': { x: 25, y: 75 },
     'Low Middle': { x: 50, y: 75 },
-    'Low Outside': { x: 75, y: 75 }
+    'Low Outside': { x: 75, y: 75 },
+    // Ball zone (outer ring)
+    'Way High Inside': { x: 10, y: 10 },
+    'Way High': { x: 50, y: 10 },
+    'Way High Outside': { x: 90, y: 10 },
+    'Way Inside': { x: 10, y: 50 },
+    'Way Outside': { x: 90, y: 50 },
+    'Way Low Inside': { x: 10, y: 90 },
+    'Way Low': { x: 50, y: 90 },
+    'Way Low Outside': { x: 90, y: 90 }
   };
   
   return coordinates[location];
@@ -137,9 +174,14 @@ export const PITCH_TYPES: PitchType[] = [
 ];
 
 export const PITCH_LOCATIONS: PitchLocation[] = [
+  // Strike zone (3x3 inner grid)
   'High Inside', 'High Middle', 'High Outside',
   'Middle Inside', 'Middle Middle', 'Middle Outside',
-  'Low Inside', 'Low Middle', 'Low Outside'
+  'Low Inside', 'Low Middle', 'Low Outside',
+  // Ball zone (outer ring)
+  'Way High Inside', 'Way High', 'Way High Outside',
+  'Way Inside', 'Way Outside',
+  'Way Low Inside', 'Way Low', 'Way Low Outside'
 ];
 
 export const PITCH_RESULTS: PitchResult[] = [
