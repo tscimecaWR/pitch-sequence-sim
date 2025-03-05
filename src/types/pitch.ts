@@ -9,6 +9,7 @@ export type PitchType =
   | 'Splitter';
 
 export type BatterHandedness = 'Right' | 'Left';
+export type PitcherHandedness = 'Right' | 'Left';
 
 export type PitchLocation = 
   // Strike zone (3x3 inner grid)
@@ -57,4 +58,5 @@ export interface Pitch {
   };
   atBatResult?: string;
   batterHandedness?: BatterHandedness;
+  pitcherHandedness?: PitcherHandedness;
 }

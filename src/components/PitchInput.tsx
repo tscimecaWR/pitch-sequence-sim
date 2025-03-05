@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pitch, PitchType, PitchLocation, PitchResult, BatterHandedness } from '../types/pitch';
+import { Pitch, PitchType, PitchLocation, PitchResult, BatterHandedness, PitcherHandedness } from '../types/pitch';
 import { PITCH_TYPES, PITCH_LOCATIONS, PITCH_RESULTS, generateId } from '../utils/pitchUtils';
 import PitchZone from './PitchZone';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -18,6 +18,8 @@ interface PitchInputProps {
   setSelectedLocation: (location: PitchLocation) => void;
   batterHandedness: BatterHandedness;
   setBatterHandedness: (handedness: BatterHandedness) => void;
+  pitcherHandedness: PitcherHandedness;
+  setPitcherHandedness: (handedness: PitcherHandedness) => void;
 }
 
 const PitchInput: React.FC<PitchInputProps> = ({ 
@@ -27,7 +29,9 @@ const PitchInput: React.FC<PitchInputProps> = ({
   setSelectedType, 
   setSelectedLocation,
   batterHandedness,
-  setBatterHandedness
+  setBatterHandedness,
+  pitcherHandedness,
+  setPitcherHandedness
 }) => {
   const [result, setResult] = useState<PitchResult>('Strike');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +45,8 @@ const PitchInput: React.FC<PitchInputProps> = ({
       location: selectedLocation,
       result,
       timestamp: Date.now(),
-      batterHandedness
+      batterHandedness,
+      pitcherHandedness
     };
     
     // Small delay for animation
@@ -51,24 +56,39 @@ const PitchInput: React.FC<PitchInputProps> = ({
     }, 300);
   };
 
-  const toggleHandedness = () => {
+  const toggleBatterHandedness = () => {
     setBatterHandedness(batterHandedness === 'Right' ? 'Left' : 'Right');
+  };
+
+  const togglePitcherHandedness = () => {
+    setPitcherHandedness(pitcherHandedness === 'Right' ? 'Left' : 'Right');
   };
 
   return (
     <Card className="w-full max-w-md animate-fade-in shadow-custom bg-card/80 backdrop-blur-sm rounded-xl">
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium flex justify-between items-center">
+        <CardTitle className="text-xl font-medium">
           <span>Enter Pitch Data</span>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={toggleHandedness}
-            className="flex items-center gap-2"
-          >
-            <FlipHorizontal size={16} />
-            {batterHandedness === 'Right' ? 'Right handed batter' : 'Left handed batter'}
-          </Button>
+          <div className="flex gap-2 mt-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleBatterHandedness}
+              className="flex items-center gap-2 flex-1"
+            >
+              <FlipHorizontal size={16} />
+              {batterHandedness === 'Right' ? 'Right handed batter' : 'Left handed batter'}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={togglePitcherHandedness}
+              className="flex items-center gap-2 flex-1"
+            >
+              <FlipHorizontal size={16} />
+              {pitcherHandedness === 'Right' ? 'Right handed pitcher' : 'Left handed pitcher'}
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       
