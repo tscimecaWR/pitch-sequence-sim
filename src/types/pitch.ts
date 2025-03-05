@@ -6,9 +6,7 @@ export type PitchType =
   | 'Changeup'
   | 'Cutter'
   | 'Sinker'
-  | 'Splitter'
-  | 'Knuckleball'
-  | 'Eephus';
+  | 'Splitter';
 
 export type PitchLocation = 
   | 'High Inside'

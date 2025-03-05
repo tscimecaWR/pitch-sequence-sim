@@ -1,4 +1,3 @@
-
 import { Pitch, PitchType, PitchLocation, PitchResult } from '../types/pitch';
 
 // Generate a unique ID
@@ -134,7 +133,7 @@ export const getResultColor = (result: PitchResult): string => {
 
 export const PITCH_TYPES: PitchType[] = [
   'Fastball', 'Curveball', 'Slider', 'Changeup', 'Cutter', 
-  'Sinker', 'Splitter', 'Knuckleball', 'Eephus'
+  'Sinker', 'Splitter'
 ];
 
 export const PITCH_LOCATIONS: PitchLocation[] = [
