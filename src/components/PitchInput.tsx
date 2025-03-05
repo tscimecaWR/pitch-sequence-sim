@@ -8,7 +8,7 @@ import { PITCH_TYPES, PITCH_LOCATIONS, PITCH_RESULTS, generateId } from '../util
 import PitchZone from './PitchZone';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { FlipHorizontal } from 'lucide-react';
+import { User, HandMetal } from 'lucide-react';
 
 interface PitchInputProps {
   onAddPitch: (pitch: Pitch) => void;
@@ -76,7 +76,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
               onClick={toggleBatterHandedness}
               className="flex items-center gap-2 flex-1"
             >
-              <FlipHorizontal size={16} />
+              <User size={16} />
               {batterHandedness === 'Right' ? 'Right handed batter' : 'Left handed batter'}
             </Button>
             <Button 
@@ -85,7 +85,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
               onClick={togglePitcherHandedness}
               className="flex items-center gap-2 flex-1"
             >
-              <FlipHorizontal size={16} />
+              <HandMetal size={16} />
               {pitcherHandedness === 'Right' ? 'Right handed pitcher' : 'Left handed pitcher'}
             </Button>
           </div>
