@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -75,7 +74,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
               onClick={toggleBatterHandedness}
               className="flex items-center gap-2 flex-1"
             >
-              <div className={`w-5 h-5 relative ${batterHandedness === 'Left' ? 'scale-x-[-1]' : ''}`}>
+              <div className={`w-5 h-5 relative ${batterHandedness === 'Right' ? 'scale-x-[-1]' : ''}`}>
                 <img 
                   src="/lovable-uploads/86911cef-1571-4281-8a11-7f6be2d9a96e.png" 
                   alt="Batter" 
@@ -90,7 +89,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
               onClick={togglePitcherHandedness}
               className="flex items-center gap-2 flex-1"
             >
-              <div className={`w-5 h-5 relative ${pitcherHandedness === 'Left' ? 'scale-x-[-1]' : ''}`}>
+              <div className={`w-5 h-5 relative ${pitcherHandedness === 'Right' ? 'scale-x-[-1]' : ''}`}>
                 <img 
                   src="/lovable-uploads/5192d19e-cf1d-411f-a5e2-c1046a34522d.png" 
                   alt="Pitcher" 
