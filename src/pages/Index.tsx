@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import PitchInput from '@/components/PitchInput';
 import PitchHistory from '@/components/PitchHistory';
 import PitchRecommendation from '@/components/PitchRecommendation';
 import CountTracker from '@/components/CountTracker';
+import DataUploader from '@/components/DataUploader';
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '@/types/pitch';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,6 @@ const Index = () => {
   const [pitcherHandedness, setPitcherHandedness] = useState<PitcherHandedness>('Right');
 
   const handleAddPitch = (pitch: Pitch) => {
-    // Add count information to the pitch
     const pitchWithCount = {
       ...pitch,
       count: {
@@ -34,7 +33,6 @@ const Index = () => {
       }
     };
     
-    // Update the count based on the pitch result
     let newBalls = balls;
     let newStrikes = strikes;
     let atBatResult: string | undefined;
@@ -42,21 +40,16 @@ const Index = () => {
     if (pitch.result === 'Ball') {
       newBalls = Math.min(balls + 1, 4);
       setBalls(newBalls);
-      // Update the "after" count
       pitchWithCount.count.after.balls = newBalls;
     } else if (pitch.result === 'Strike' || pitch.result === 'Foul') {
-      // In baseball, foul balls can only count as strikes until there are 2 strikes
       if (pitch.result === 'Foul' && strikes === 2) {
-        // Do nothing, foul with 2 strikes doesn't add a strike
       } else {
         newStrikes = Math.min(strikes + 1, 3);
         setStrikes(newStrikes);
-        // Update the "after" count
         pitchWithCount.count.after.strikes = newStrikes;
       }
     }
     
-    // Check if the at-bat is over and set the at-bat result
     if (balls === 3 && pitch.result === 'Ball') {
       atBatResult = "Walk";
       toast.info("Walk!", { description: "Batter takes first base on balls" });
@@ -76,7 +69,6 @@ const Index = () => {
       resetCount();
     }
     
-    // Add the at-bat result if the at-bat is over
     if (atBatResult) {
       pitchWithCount.atBatResult = atBatResult;
     }
@@ -142,6 +134,8 @@ const Index = () => {
               pitcherHandedness={pitcherHandedness}
               setPitcherHandedness={setPitcherHandedness}
             />
+            
+            <DataUploader />
           </div>
           
           <div className="space-y-6 animate-slide-up" style={{ animationDelay: '200ms' }}>

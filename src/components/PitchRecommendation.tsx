@@ -1,11 +1,12 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
-import { recommendNextPitch } from '../utils/pitchUtils';
+import { recommendNextPitch } from '../utils/pitchRecommendation';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Info } from 'lucide-react';
+import { Copy, Info, LineChart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PitchRecommendationProps {
@@ -21,7 +22,11 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
   batterHandedness,
   pitcherHandedness
 }) => {
-  const [recommendation, setRecommendation] = useState<{ type: PitchType; location: PitchLocation } | null>(null);
+  const [recommendation, setRecommendation] = useState<{ 
+    type: PitchType; 
+    location: PitchLocation;
+    insights?: string[];
+  } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
   // Get the current count for context
@@ -68,7 +73,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
           };
         }
         
-        setRecommendation(recommendNextPitch(updatedPitches));
+        setRecommendation(recommendNextPitch(updatedPitches, { includeInsights: true }));
         setIsCalculating(false);
       }, 500);
       
@@ -108,7 +113,10 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     )}>
       <CardHeader className="pb-2">
         <CardTitle className="text-xl font-medium flex items-center justify-between">
-          <span>{isCalculating ? 'Calculating...' : 'Next Pitch Recommendation'}</span>
+          <span className="flex items-center gap-2">
+            {!isCalculating && <LineChart size={18} className="text-primary" />}
+            {isCalculating ? 'Calculating...' : 'Next Pitch Recommendation'}
+          </span>
           {!isCalculating && (
             <Badge variant="outline" className="ml-2">
               Count: {count.balls}-{count.strikes}
@@ -145,6 +153,24 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                   {getRecommendationContext()}
                 </span>
               </div>
+              
+              {/* Data-driven insights section */}
+              {recommendation.insights && recommendation.insights.length > 0 && (
+                <div className="w-full mt-2 p-3 bg-primary/5 rounded-lg">
+                  <div className="text-sm font-medium mb-1 flex items-center gap-1">
+                    <LineChart size={14} className="text-primary" />
+                    Data-Driven Insights:
+                  </div>
+                  <ul className="space-y-1">
+                    {recommendation.insights.map((insight, index) => (
+                      <li key={index} className="text-xs text-muted-foreground flex items-start gap-1">
+                        <span className="inline-block rounded-full h-1.5 w-1.5 bg-primary mt-1.5 flex-shrink-0" />
+                        {insight}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               
               <div className="text-center text-sm text-muted-foreground">
                 Based on {Math.min(pitches.length, 5)} previous {pitches.length === 1 ? 'pitch' : 'pitches'}
