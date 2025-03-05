@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { setHistoricalPitchData, importHistoricalData } from '../utils/dataBasedRecommendation';
+import { setHistoricalPitchData } from '../utils/pitchRecommendation';
+import { importHistoricalData } from '../utils/dataBasedRecommendation';
 import { toast } from 'sonner';
 import { Upload, Info, Database } from 'lucide-react';
 
