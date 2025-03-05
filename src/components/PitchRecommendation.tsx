@@ -8,9 +8,13 @@ import { cn } from '@/lib/utils';
 
 interface PitchRecommendationProps {
   pitches: Pitch[];
+  onRecommendationUpdate?: (recommendation: { type: PitchType; location: PitchLocation } | null) => void;
 }
 
-const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ pitches }) => {
+const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ 
+  pitches, 
+  onRecommendationUpdate 
+}) => {
   const [recommendation, setRecommendation] = useState<{ type: PitchType; location: PitchLocation } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -21,15 +25,27 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ pitches }) =>
       
       // Add a small delay to simulate calculation and create a nice animation effect
       const timer = setTimeout(() => {
-        setRecommendation(recommendNextPitch(pitches));
+        const newRecommendation = recommendNextPitch(pitches);
+        setRecommendation(newRecommendation);
+        
+        // Notify parent component about the new recommendation
+        if (onRecommendationUpdate) {
+          onRecommendationUpdate(newRecommendation);
+        }
+        
         setIsCalculating(false);
       }, 500);
       
       return () => clearTimeout(timer);
     } else {
       setRecommendation(null);
+      
+      // Notify parent component that there's no recommendation
+      if (onRecommendationUpdate) {
+        onRecommendationUpdate(null);
+      }
     }
-  }, [pitches]);
+  }, [pitches, onRecommendationUpdate]);
 
   if (pitches.length === 0) {
     return (

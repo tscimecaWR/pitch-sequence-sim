@@ -8,12 +8,14 @@ import { PITCH_TYPES, PITCH_LOCATIONS, PITCH_RESULTS, generateId } from '../util
 import PitchZone from './PitchZone';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { RotateCcw } from 'lucide-react';
 
 interface PitchInputProps {
   onAddPitch: (pitch: Pitch) => void;
+  recommendation: { type: PitchType; location: PitchLocation } | null;
 }
 
-const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
+const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch, recommendation }) => {
   const [type, setType] = useState<PitchType>('Fastball');
   const [location, setLocation] = useState<PitchLocation>('Middle Middle');
   const [result, setResult] = useState<PitchResult>('Strike');
@@ -35,6 +37,13 @@ const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
       onAddPitch(newPitch);
       setIsSubmitting(false);
     }, 300);
+  };
+
+  const loadRecommendation = () => {
+    if (recommendation) {
+      setType(recommendation.type);
+      setLocation(recommendation.location);
+    }
   };
 
   return (
@@ -93,7 +102,17 @@ const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
         </div>
       </CardContent>
       
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-3">
+        {recommendation && (
+          <Button 
+            variant="outline" 
+            onClick={loadRecommendation} 
+            className="w-full justify-between"
+            type="button"
+          >
+            Load Recommendation <RotateCcw className="h-4 w-4 ml-2" />
+          </Button>
+        )}
         <Button 
           className="w-full transition-all duration-300 font-medium"
           onClick={handleSubmit} 

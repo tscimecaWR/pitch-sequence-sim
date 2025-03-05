@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import PitchInput from '@/components/PitchInput';
 import PitchHistory from '@/components/PitchHistory';
 import PitchRecommendation from '@/components/PitchRecommendation';
-import { Pitch } from '@/types/pitch';
+import { Pitch, PitchType, PitchLocation } from '@/types/pitch';
 import { toast } from 'sonner';
 
 const Index = () => {
   const [pitches, setPitches] = useState<Pitch[]>([]);
+  const [currentRecommendation, setCurrentRecommendation] = useState<{ type: PitchType; location: PitchLocation } | null>(null);
 
   const handleAddPitch = (pitch: Pitch) => {
     setPitches((prevPitches) => [...prevPitches, pitch]);
@@ -15,6 +16,11 @@ const Index = () => {
       description: `${pitch.type} - ${pitch.location} - ${pitch.result}`,
       duration: 3000,
     });
+  };
+
+  // This function will be called when a new recommendation is generated
+  const handleRecommendationUpdate = (recommendation: { type: PitchType; location: PitchLocation } | null) => {
+    setCurrentRecommendation(recommendation);
   };
 
   return (
@@ -29,11 +35,17 @@ const Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <div className="space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <PitchInput onAddPitch={handleAddPitch} />
+            <PitchInput 
+              onAddPitch={handleAddPitch} 
+              recommendation={currentRecommendation}
+            />
           </div>
           
           <div className="space-y-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-            <PitchRecommendation pitches={pitches} />
+            <PitchRecommendation 
+              pitches={pitches} 
+              onRecommendationUpdate={handleRecommendationUpdate}
+            />
             <PitchHistory pitches={pitches} />
           </div>
         </div>
