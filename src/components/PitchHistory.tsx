@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,18 +17,33 @@ const groupPitchesByAtBat = (pitches: Pitch[]) => {
   const groups: Pitch[][] = [];
   let currentGroup: Pitch[] = [];
 
-  const reversedPitches = [...pitches].reverse();
-
-  reversedPitches.forEach((pitch) => {
-    if (currentGroup.length === 0 || currentGroup[0].atBatResult) {
+  // Create a copy of pitches and reverse them to process oldest first
+  const chronologicalPitches = [...pitches].reverse();
+  
+  chronologicalPitches.forEach((pitch) => {
+    if (currentGroup.length === 0) {
+      // Start a new group
       currentGroup = [pitch];
       groups.push(currentGroup);
     } else {
-      currentGroup.unshift(pitch);
+      // Check if the previous pitch ended an at-bat
+      const previousPitch = currentGroup[currentGroup.length - 1];
+      const isAtBatEnded = previousPitch.atBatResult !== undefined;
+      
+      if (isAtBatEnded) {
+        // Start a new group if the previous pitch ended an at-bat
+        currentGroup = [pitch];
+        groups.push(currentGroup);
+      } else {
+        // Add to current group
+        currentGroup.push(pitch);
+      }
     }
   });
 
-  return groups;
+  // Reverse each group and the groups array to get chronological order within at-bats
+  // but with the most recent at-bat first
+  return groups.map(group => group.reverse()).reverse();
 };
 
 const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
