@@ -1,4 +1,3 @@
-
 import { Pitch, PitchType, PitchLocation, PitchResult } from '../types/pitch';
 
 // Generate a unique ID
@@ -60,7 +59,12 @@ export const recommendNextPitch = (pitches: Pitch[]): { type: PitchType; locatio
 // Helper function to find key with highest score
 function findHighestScoringKey<T extends string>(scores: Record<T, number>): T {
   return Object.entries(scores)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => {
+      // Ensure we're comparing numbers by converting to numbers and handling null/undefined
+      const scoreA = a[1] === null || a[1] === undefined ? 0 : Number(a[1]);
+      const scoreB = b[1] === null || b[1] === undefined ? 0 : Number(b[1]);
+      return scoreB - scoreA;
+    })
     .map(entry => entry[0] as T)[0];
 }
 
