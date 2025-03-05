@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -118,13 +119,26 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                               index === group.length - 1 && pitch.atBatResult ? "border-primary/20" : "border-gray-100"
                             )}
                           >
-                            <div className="flex justify-between items-start">
+                            <div className="grid grid-cols-3 gap-4">
+                              {/* Column 1: Pitch Type & Location */}
                               <div className="space-y-1">
                                 <div className="font-medium">{pitch.type}</div>
                                 <div className="text-sm text-muted-foreground">{displayLocation}</div>
                                 
+                                {pitch.result && (
+                                  <div className={cn(
+                                    "mt-2 px-2 py-1 text-xs font-medium rounded text-white inline-block",
+                                    getResultColor(pitch.result)
+                                  )}>
+                                    {pitch.result}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Column 2: Count & Batter Info */}
+                              <div className="space-y-1">
                                 {pitch.count && (
-                                  <div className="space-y-1 mt-1">
+                                  <div className="space-y-1">
                                     <div className="flex items-center gap-1">
                                       <span className="text-xs text-muted-foreground">Count before:</span>
                                       <Badge variant="outline" className="text-xs">
@@ -141,47 +155,44 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                                 )}
                                 
                                 {pitch.batterHandedness && (
-                                  <div className="mt-1 text-xs text-muted-foreground">
+                                  <div className="mt-2 text-xs text-muted-foreground">
                                     Batter: {pitch.batterHandedness}-handed
                                   </div>
                                 )}
-                              </div>
-                              <div className={cn(
-                                "px-2 py-1 text-xs font-medium rounded text-white",
-                                getResultColor(pitch.result)
-                              )}>
-                                {pitch.result}
-                              </div>
-                            </div>
-                            
-                            {pitch.atBatResult && (
-                              <div className="mt-2 text-sm font-medium text-primary">
-                                At-bat result: {pitch.atBatResult}
-                              </div>
-                            )}
-                            
-                            <div className="mt-3 w-20 h-20 border border-gray-200 rounded grid grid-cols-3 grid-rows-3 overflow-hidden mx-auto">
-                              {['High Inside', 'High Middle', 'High Outside',
-                                'Middle Inside', 'Middle Middle', 'Middle Outside',
-                                'Low Inside', 'Low Middle', 'Low Outside'].map((zone) => {
-                                const transformedZone = pitch.batterHandedness === 'Left' 
-                                  ? zone
-                                    .replace('Inside', 'TEMP')
-                                    .replace('Outside', 'Inside')
-                                    .replace('TEMP', 'Outside')
-                                  : zone;
                                 
-                                const isActive = transformedZone === pitch.location;
-                                return (
-                                  <div 
-                                    key={zone} 
-                                    className={cn(
-                                      "border border-gray-100",
-                                      isActive ? getResultColor(pitch.result) : "bg-white/50"
-                                    )}
-                                  />
-                                );
-                              })}
+                                {pitch.atBatResult && (
+                                  <div className="mt-2 text-sm font-medium text-primary">
+                                    At-bat result: {pitch.atBatResult}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Column 3: Pitch Zone Visualization */}
+                              <div className="flex justify-center items-start">
+                                <div className="w-20 h-20 border border-gray-200 rounded grid grid-cols-3 grid-rows-3 overflow-hidden">
+                                  {['High Inside', 'High Middle', 'High Outside',
+                                    'Middle Inside', 'Middle Middle', 'Middle Outside',
+                                    'Low Inside', 'Low Middle', 'Low Outside'].map((zone) => {
+                                    const transformedZone = pitch.batterHandedness === 'Left' 
+                                      ? zone
+                                        .replace('Inside', 'TEMP')
+                                        .replace('Outside', 'Inside')
+                                        .replace('TEMP', 'Outside')
+                                      : zone;
+                                    
+                                    const isActive = transformedZone === pitch.location;
+                                    return (
+                                      <div 
+                                        key={zone} 
+                                        className={cn(
+                                          "border border-gray-100",
+                                          isActive ? getResultColor(pitch.result) : "bg-white/50"
+                                        )}
+                                      />
+                                    );
+                                  })}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         );
