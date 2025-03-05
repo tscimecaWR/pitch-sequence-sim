@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Pitch } from '../types/pitch';
+import { Pitch, PitchLocation, BatterHandedness } from '../types/pitch';
 import { getResultColor, getPitchZoneCoordinates } from '../utils/pitchUtils';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -16,31 +16,34 @@ const groupPitchesByAtBat = (pitches: Pitch[]) => {
   const groups: Pitch[][] = [];
   let currentGroup: Pitch[] = [];
   
-  // Process pitches in chronological order
   const chronologicalPitches = [...pitches];
   
   for (let i = 0; i < chronologicalPitches.length; i++) {
     const pitch = chronologicalPitches[i];
     
-    // Start a new at-bat when:
-    // 1. This is the first pitch overall
-    // 2. The previous pitch ended an at-bat (has an atBatResult)
-    // 3. The count was reset to 0-0 (indicating a new at-bat)
     const isPreviousPitchAtBatEnd = i > 0 && chronologicalPitches[i-1].atBatResult !== undefined;
     const isNewCount = pitch.count?.before.balls === 0 && pitch.count?.before.strikes === 0;
     
     if (i === 0 || isPreviousPitchAtBatEnd || isNewCount) {
-      // Start a new at-bat group
       currentGroup = [pitch];
       groups.push(currentGroup);
     } else {
-      // Continue current at-bat
       currentGroup.push(pitch);
     }
   }
   
-  // Reverse the groups array so the most recent at-bat appears first
   return groups.reverse();
+};
+
+const getDisplayLocation = (location: PitchLocation, batterHandedness: BatterHandedness = 'Right'): string => {
+  if (batterHandedness === 'Right') {
+    return location;
+  } else {
+    return location
+      .replace('Inside', 'TEMP')
+      .replace('Outside', 'Inside')
+      .replace('TEMP', 'Outside');
+  }
 };
 
 const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
@@ -104,68 +107,85 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                   
                   <CollapsibleContent>
                     <div className="px-3 pb-3 space-y-3">
-                      {group.map((pitch, index) => (
-                        <div 
-                          key={pitch.id}
-                          className={cn(
-                            "p-3 rounded-lg border bg-white/80",
-                            index === group.length - 1 && pitch.atBatResult ? "border-primary/20" : "border-gray-100"
-                          )}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <div className="font-medium">{pitch.type}</div>
-                              <div className="text-sm text-muted-foreground">{pitch.location}</div>
-                              
-                              {pitch.count && (
-                                <div className="space-y-1 mt-1">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-xs text-muted-foreground">Count before:</span>
-                                    <Badge variant="outline" className="text-xs">
-                                      {pitch.count.before.balls}-{pitch.count.before.strikes}
-                                    </Badge>
+                      {group.map((pitch, index) => {
+                        const displayLocation = getDisplayLocation(pitch.location, pitch.batterHandedness);
+                        
+                        return (
+                          <div 
+                            key={pitch.id}
+                            className={cn(
+                              "p-3 rounded-lg border bg-white/80",
+                              index === group.length - 1 && pitch.atBatResult ? "border-primary/20" : "border-gray-100"
+                            )}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-1">
+                                <div className="font-medium">{pitch.type}</div>
+                                <div className="text-sm text-muted-foreground">{displayLocation}</div>
+                                
+                                {pitch.count && (
+                                  <div className="space-y-1 mt-1">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-xs text-muted-foreground">Count before:</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {pitch.count.before.balls}-{pitch.count.before.strikes}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-xs text-muted-foreground">Count after:</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {pitch.count.after.balls}-{pitch.count.after.strikes}
+                                      </Badge>
+                                    </div>
                                   </div>
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-xs text-muted-foreground">Count after:</span>
-                                    <Badge variant="outline" className="text-xs">
-                                      {pitch.count.after.balls}-{pitch.count.after.strikes}
-                                    </Badge>
+                                )}
+                                
+                                {pitch.batterHandedness && (
+                                  <div className="mt-1 text-xs text-muted-foreground">
+                                    Batter: {pitch.batterHandedness}-handed
                                   </div>
-                                </div>
-                              )}
+                                )}
+                              </div>
+                              <div className={cn(
+                                "px-2 py-1 text-xs font-medium rounded text-white",
+                                getResultColor(pitch.result)
+                              )}>
+                                {pitch.result}
+                              </div>
                             </div>
-                            <div className={cn(
-                              "px-2 py-1 text-xs font-medium rounded text-white",
-                              getResultColor(pitch.result)
-                            )}>
-                              {pitch.result}
+                            
+                            {pitch.atBatResult && (
+                              <div className="mt-2 text-sm font-medium text-primary">
+                                At-bat result: {pitch.atBatResult}
+                              </div>
+                            )}
+                            
+                            <div className="mt-3 w-20 h-20 border border-gray-200 rounded grid grid-cols-3 grid-rows-3 overflow-hidden mx-auto">
+                              {['High Inside', 'High Middle', 'High Outside',
+                                'Middle Inside', 'Middle Middle', 'Middle Outside',
+                                'Low Inside', 'Low Middle', 'Low Outside'].map((zone) => {
+                                const transformedZone = pitch.batterHandedness === 'Left' 
+                                  ? zone
+                                    .replace('Inside', 'TEMP')
+                                    .replace('Outside', 'Inside')
+                                    .replace('TEMP', 'Outside')
+                                  : zone;
+                                
+                                const isActive = transformedZone === pitch.location;
+                                return (
+                                  <div 
+                                    key={zone} 
+                                    className={cn(
+                                      "border border-gray-100",
+                                      isActive ? getResultColor(pitch.result) : "bg-white/50"
+                                    )}
+                                  />
+                                );
+                              })}
                             </div>
                           </div>
-                          
-                          {pitch.atBatResult && (
-                            <div className="mt-2 text-sm font-medium text-primary">
-                              At-bat result: {pitch.atBatResult}
-                            </div>
-                          )}
-                          
-                          <div className="mt-3 w-20 h-20 border border-gray-200 rounded grid grid-cols-3 grid-rows-3 overflow-hidden mx-auto">
-                            {['High Inside', 'High Middle', 'High Outside',
-                              'Middle Inside', 'Middle Middle', 'Middle Outside',
-                              'Low Inside', 'Low Middle', 'Low Outside'].map((zone) => {
-                              const isActive = zone === pitch.location;
-                              return (
-                                <div 
-                                  key={zone} 
-                                  className={cn(
-                                    "border border-gray-100",
-                                    isActive ? getResultColor(pitch.result) : "bg-white/50"
-                                  )}
-                                />
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
