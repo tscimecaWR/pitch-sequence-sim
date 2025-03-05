@@ -127,7 +127,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
               </div>
               
               <div className="text-center text-sm text-muted-foreground">
-                Based on {pitches.length} previous {pitches.length === 1 ? 'pitch' : 'pitches'}
+                Based on {Math.min(pitches.length, 5)} previous {pitches.length === 1 ? 'pitch' : 'pitches'}
               </div>
             </div>
             
