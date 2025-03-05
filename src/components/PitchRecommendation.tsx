@@ -6,7 +6,8 @@ import { recommendNextPitch } from '../utils/pitchUtils';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, Info } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface PitchRecommendationProps {
   pitches: Pitch[];
@@ -19,6 +20,27 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
 }) => {
   const [recommendation, setRecommendation] = useState<{ type: PitchType; location: PitchLocation } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+
+  // Get the current count for context
+  const getCurrentCount = () => {
+    if (pitches.length === 0) return { balls: 0, strikes: 0 };
+    const lastPitch = pitches[pitches.length - 1];
+    return lastPitch.count?.after || { balls: 0, strikes: 0 };
+  };
+
+  // Get recommendation context based on count
+  const getRecommendationContext = () => {
+    const count = getCurrentCount();
+    const { balls, strikes } = count;
+    
+    if (strikes === 2) return "Strikeout count";
+    if (balls === 3) return "Avoid walking the batter";
+    if (balls === strikes) return "Even count";
+    if (balls === 0 && strikes === 0) return "First pitch";
+    if (balls > strikes) return "Behind in count";
+    if (strikes > balls) return "Ahead in count";
+    return "";
+  };
 
   useEffect(() => {
     // Only recalculate if we have pitches
@@ -58,14 +80,21 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     );
   }
 
+  const count = getCurrentCount();
+
   return (
     <Card className={cn(
       "w-full shadow-sm transition-all duration-300 overflow-hidden",
       isCalculating ? "bg-muted/80" : "bg-card/80 backdrop-blur-sm"
     )}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium">
-          {isCalculating ? 'Calculating...' : 'Next Pitch Recommendation'}
+        <CardTitle className="text-xl font-medium flex items-center justify-between">
+          <span>{isCalculating ? 'Calculating...' : 'Next Pitch Recommendation'}</span>
+          {!isCalculating && (
+            <Badge variant="outline" className="ml-2">
+              Count: {count.balls}-{count.strikes}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -89,8 +118,17 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
               />
             </div>
             
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              Based on {pitches.length} previous {pitches.length === 1 ? 'pitch' : 'pitches'}
+            <div className="mt-4 flex flex-col gap-2 items-center">
+              <div className="flex items-center gap-1.5 text-sm">
+                <Info size={14} className="text-muted-foreground" />
+                <span className="text-muted-foreground font-medium">
+                  {getRecommendationContext()}
+                </span>
+              </div>
+              
+              <div className="text-center text-sm text-muted-foreground">
+                Based on {pitches.length} previous {pitches.length === 1 ? 'pitch' : 'pitches'}
+              </div>
             </div>
             
             <div className="mt-6 flex justify-center">
