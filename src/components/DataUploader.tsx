@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { setHistoricalPitchData } from '../utils/pitchRecommendation';
 import { importHistoricalData } from '../utils/dataBasedRecommendation';
 import { toast } from 'sonner';
-import { Upload, Info, Database } from 'lucide-react';
+import { Upload, Info, Database, Download } from 'lucide-react';
 
 const DataUploader = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -15,6 +14,11 @@ const DataUploader = () => {
     totalRecords: number;
     timestamp: number;
   } | null>(null);
+
+  const sampleCsvContent = `type,location,balls,strikes,batterHandedness,pitcherHandedness,result
+Fastball,High Inside,0,0,Right,Right,Successful
+Slider,Low Outside,1,2,Left,Right,Successful
+Changeup,Low Middle,3,2,Right,Left,Unsuccessful`;
 
   const parseCSV = (csvText: string) => {
     const lines = csvText.split('\n');
@@ -150,6 +154,14 @@ const DataUploader = () => {
         <CardDescription>
           Upload historical pitch data to enhance recommendations
         </CardDescription>
+        <a
+          href={`data:text/csv;charset=utf-8,${encodeURIComponent(sampleCsvContent)}`}
+          download="sample_pitch_data.csv"
+          className="text-sm text-muted-foreground hover:underline flex items-center gap-1 mt-1"
+        >
+          <Download className="h-4 w-4" />
+          Download Sample CSV
+        </a>
       </CardHeader>
       
       <CardContent>
