@@ -57,7 +57,11 @@ export default {
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				xl: '32px',  // Add a new extra-large border radius
+			},
+			boxShadow: {
+				'custom': '0 4px 4px rgba(0, 0, 0, 0.1)',  // Add a custom 4px drop shadow
 			},
 			keyframes: {
 				'accordion-down': {

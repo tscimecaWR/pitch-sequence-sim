@@ -11,7 +11,7 @@ interface CountTrackerProps {
 
 const CountTracker: React.FC<CountTrackerProps> = ({ balls, strikes }) => {
   return (
-    <Card className="w-full bg-card/80 backdrop-blur-sm animate-fade-in">
+    <Card className="w-full bg-card/80 backdrop-blur-sm animate-fade-in rounded-xl shadow-custom">
       <CardContent className="py-4">
         <div className="flex justify-center items-center gap-8">
           <div className="flex flex-col items-center">

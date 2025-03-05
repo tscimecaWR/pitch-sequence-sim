@@ -46,7 +46,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md animate-fade-in shadow-sm bg-card/80 backdrop-blur-sm">
+    <Card className="w-full max-w-md animate-fade-in shadow-custom bg-card/80 backdrop-blur-sm rounded-xl">
       <CardHeader className="pb-2">
         <CardTitle className="text-xl font-medium">Enter Pitch Data</CardTitle>
       </CardHeader>
@@ -79,7 +79,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
             <PitchZone
               selectedLocation={selectedLocation}
               onSelectLocation={setSelectedLocation}
-              className="animate-scale-in"
+              className="animate-scale-in rounded-lg overflow-hidden shadow-custom"
             />
           </div>
         </div>
@@ -87,10 +87,10 @@ const PitchInput: React.FC<PitchInputProps> = ({
         <div className="space-y-2">
           <label className="text-sm font-medium">Pitch Result</label>
           <Select value={result} onValueChange={(value) => setResult(value as PitchResult)}>
-            <SelectTrigger>
+            <SelectTrigger className="rounded-lg">
               <SelectValue placeholder="Select result" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-lg">
               {PITCH_RESULTS.map((pitchResult) => (
                 <SelectItem key={pitchResult} value={pitchResult}>
                   {pitchResult}
@@ -103,7 +103,7 @@ const PitchInput: React.FC<PitchInputProps> = ({
       
       <CardFooter>
         <Button 
-          className="w-full transition-all duration-300 font-medium"
+          className="w-full transition-all duration-300 font-medium rounded-lg"
           onClick={handleSubmit} 
           disabled={isSubmitting}
         >
