@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PitchInput from '@/components/PitchInput';
 import PitchHistory from '@/components/PitchHistory';
@@ -124,37 +123,29 @@ const Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <div className="space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <div className="w-full">
-              <PitchInput 
-                onAddPitch={handleAddPitch} 
-                selectedType={selectedType}
-                selectedLocation={selectedLocation}
-                setSelectedType={setSelectedType}
-                setSelectedLocation={setSelectedLocation}
-                batterHandedness={batterHandedness}
-                setBatterHandedness={setBatterHandedness}
-                pitcherHandedness={pitcherHandedness}
-                setPitcherHandedness={setPitcherHandedness}
-              />
-            </div>
+            <PitchInput 
+              onAddPitch={handleAddPitch} 
+              selectedType={selectedType}
+              selectedLocation={selectedLocation}
+              setSelectedType={setSelectedType}
+              setSelectedLocation={setSelectedLocation}
+              batterHandedness={batterHandedness}
+              setBatterHandedness={setBatterHandedness}
+              pitcherHandedness={pitcherHandedness}
+              setPitcherHandedness={setPitcherHandedness}
+            />
             
-            <div className="w-full">
-              <DataUploader />
-            </div>
+            <DataUploader />
           </div>
           
           <div className="space-y-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-            <div className="w-full">
-              <PitchRecommendation 
-                pitches={pitches} 
-                onLoadRecommendation={handleLoadRecommendation}
-                batterHandedness={batterHandedness}
-                pitcherHandedness={pitcherHandedness}
-              />
-            </div>
-            <div className="w-full">
-              <PitchHistory pitches={pitches} />
-            </div>
+            <PitchRecommendation 
+              pitches={pitches} 
+              onLoadRecommendation={handleLoadRecommendation}
+              batterHandedness={batterHandedness}
+              pitcherHandedness={pitcherHandedness}
+            />
+            <PitchHistory pitches={pitches} />
           </div>
         </div>
       </div>
