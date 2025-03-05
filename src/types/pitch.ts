@@ -44,8 +44,14 @@ export interface Pitch {
   result: PitchResult;
   timestamp: number;
   count?: {
-    balls: number;
-    strikes: number;
+    before: {
+      balls: number;
+      strikes: number;
+    };
+    after: {
+      balls: number;
+      strikes: number;
+    };
   };
   atBatResult?: string;
 }

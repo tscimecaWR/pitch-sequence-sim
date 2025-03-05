@@ -21,8 +21,14 @@ const Index = () => {
     const pitchWithCount = {
       ...pitch,
       count: {
-        balls,
-        strikes,
+        before: {
+          balls,
+          strikes,
+        },
+        after: {
+          balls,
+          strikes,
+        }
       }
     };
     
@@ -34,6 +40,8 @@ const Index = () => {
     if (pitch.result === 'Ball') {
       newBalls = Math.min(balls + 1, 4);
       setBalls(newBalls);
+      // Update the "after" count
+      pitchWithCount.count.after.balls = newBalls;
     } else if (pitch.result === 'Strike' || pitch.result === 'Foul') {
       // In baseball, foul balls can only count as strikes until there are 2 strikes
       if (pitch.result === 'Foul' && strikes === 2) {
@@ -41,6 +49,8 @@ const Index = () => {
       } else {
         newStrikes = Math.min(strikes + 1, 3);
         setStrikes(newStrikes);
+        // Update the "after" count
+        pitchWithCount.count.after.strikes = newStrikes;
       }
     }
     

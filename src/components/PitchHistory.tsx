@@ -54,11 +54,19 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                       
                       {/* Count display */}
                       {pitch.count && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <span className="text-xs text-muted-foreground">Count:</span>
-                          <Badge variant="outline" className="text-xs">
-                            {pitch.count.balls}-{pitch.count.strikes}
-                          </Badge>
+                        <div className="space-y-1 mt-1">
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground">Count before:</span>
+                            <Badge variant="outline" className="text-xs">
+                              {pitch.count.before.balls}-{pitch.count.before.strikes}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground">Count after:</span>
+                            <Badge variant="outline" className="text-xs">
+                              {pitch.count.after.balls}-{pitch.count.after.strikes}
+                            </Badge>
+                          </div>
                         </div>
                       )}
                     </div>
