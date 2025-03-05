@@ -7,6 +7,7 @@ import { Pitch, PitchType, PitchLocation, PitchResult } from '../types/pitch';
 import { PITCH_TYPES, PITCH_LOCATIONS, PITCH_RESULTS, generateId } from '../utils/pitchUtils';
 import PitchZone from './PitchZone';
 import { AnimatePresence, motion } from 'framer-motion';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface PitchInputProps {
   onAddPitch: (pitch: Pitch) => void;
@@ -45,18 +46,23 @@ const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Pitch Type</label>
-          <Select value={type} onValueChange={(value) => setType(value as PitchType)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select pitch type" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60">
-              {PITCH_TYPES.map((pitchType) => (
-                <SelectItem key={pitchType} value={pitchType}>
+          <RadioGroup 
+            value={type} 
+            onValueChange={(value) => setType(value as PitchType)} 
+            className="grid grid-cols-3 gap-2"
+          >
+            {PITCH_TYPES.map((pitchType) => (
+              <div key={pitchType} className="flex items-center space-x-2">
+                <RadioGroupItem value={pitchType} id={`pitch-${pitchType}`} />
+                <label 
+                  htmlFor={`pitch-${pitchType}`} 
+                  className="text-sm cursor-pointer"
+                >
                   {pitchType}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
         </div>
         
         <div className="space-y-2">
