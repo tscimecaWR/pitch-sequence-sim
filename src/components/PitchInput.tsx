@@ -47,24 +47,24 @@ const PitchInput: React.FC<PitchInputProps> = ({
 
   return (
     <Card className="w-full max-w-md animate-fade-in shadow-sm bg-card/80 backdrop-blur-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium">Enter Pitch Data</CardTitle>
+      <CardHeader className="pb-1 pt-3">
+        <CardTitle className="text-lg font-medium">Enter Pitch Data</CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Pitch Type</label>
+      <CardContent className="py-2 space-y-3">
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Pitch Type</label>
           <RadioGroup 
             value={selectedType} 
             onValueChange={(value) => setSelectedType(value as PitchType)} 
-            className="grid grid-cols-3 gap-2"
+            className="grid grid-cols-3 gap-1"
           >
             {PITCH_TYPES.map((pitchType) => (
-              <div key={pitchType} className="flex items-center space-x-2">
-                <RadioGroupItem value={pitchType} id={`pitch-${pitchType}`} />
+              <div key={pitchType} className="flex items-center space-x-1">
+                <RadioGroupItem value={pitchType} id={`pitch-${pitchType}`} className="size-3" />
                 <label 
                   htmlFor={`pitch-${pitchType}`} 
-                  className="text-sm cursor-pointer"
+                  className="text-xs cursor-pointer"
                 >
                   {pitchType}
                 </label>
@@ -73,21 +73,21 @@ const PitchInput: React.FC<PitchInputProps> = ({
           </RadioGroup>
         </div>
         
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Pitch Location</label>
-          <div className="flex justify-center pt-2">
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Pitch Location</label>
+          <div className="flex justify-center pt-1">
             <PitchZone
               selectedLocation={selectedLocation}
               onSelectLocation={setSelectedLocation}
-              className="animate-scale-in"
+              className="animate-scale-in h-28 w-28"
             />
           </div>
         </div>
         
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Pitch Result</label>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Pitch Result</label>
           <Select value={result} onValueChange={(value) => setResult(value as PitchResult)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-xs">
               <SelectValue placeholder="Select result" />
             </SelectTrigger>
             <SelectContent>
@@ -101,16 +101,16 @@ const PitchInput: React.FC<PitchInputProps> = ({
         </div>
       </CardContent>
       
-      <CardFooter>
+      <CardFooter className="pt-1 pb-3">
         <Button 
-          className="w-full transition-all duration-300 font-medium"
+          className="w-full transition-all duration-300 font-medium text-sm h-8"
           onClick={handleSubmit} 
           disabled={isSubmitting}
         >
           {isSubmitting ? (
             <span className="inline-flex items-center">
               Processing
-              <span className="ml-2 h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin"></span>
+              <span className="ml-2 h-3 w-3 rounded-full border-2 border-t-transparent border-white animate-spin"></span>
             </span>
           ) : (
             'Add Pitch'

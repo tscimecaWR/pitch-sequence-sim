@@ -68,11 +68,11 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
   if (pitches.length === 0) {
     return (
       <Card className="w-full shadow-sm bg-card/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-xl font-medium">Next Pitch Recommendation</CardTitle>
+        <CardHeader className="pb-1 pt-3">
+          <CardTitle className="text-lg font-medium">Next Pitch Recommendation</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-[150px] flex items-center justify-center text-muted-foreground">
+        <CardContent className="py-2">
+          <div className="h-[120px] flex items-center justify-center text-muted-foreground">
             Add a pitch to get a recommendation
           </div>
         </CardContent>
@@ -87,25 +87,25 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
       "w-full shadow-sm transition-all duration-300 overflow-hidden",
       isCalculating ? "bg-muted/80" : "bg-card/80 backdrop-blur-sm"
     )}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium flex items-center justify-between">
+      <CardHeader className="pb-1 pt-3">
+        <CardTitle className="text-lg font-medium flex items-center justify-between">
           <span>{isCalculating ? 'Calculating...' : 'Next Pitch Recommendation'}</span>
           {!isCalculating && (
-            <Badge variant="outline" className="ml-2">
+            <Badge variant="outline" className="ml-2 text-xs">
               Count: {count.balls}-{count.strikes}
             </Badge>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="py-2">
         {isCalculating ? (
-          <div className="h-[200px] flex items-center justify-center">
-            <div className="h-12 w-12 rounded-full border-4 border-t-transparent border-primary animate-spin"></div>
+          <div className="h-[120px] flex items-center justify-center">
+            <div className="h-8 w-8 rounded-full border-3 border-t-transparent border-primary animate-spin"></div>
           </div>
         ) : recommendation ? (
           <div className="animate-fade-in">
-            <div className="mb-4 flex justify-center">
-              <div className="px-4 py-2 bg-accent/10 rounded-full text-xl font-medium text-accent-foreground">
+            <div className="mb-2 flex justify-center">
+              <div className="px-3 py-1 bg-accent/10 rounded-full text-lg font-medium text-accent-foreground">
                 {recommendation.type}
               </div>
             </div>
@@ -114,30 +114,31 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
               <PitchZone
                 selectedLocation={recommendation.location}
                 onSelectLocation={() => {}}
-                className="pointer-events-none"
+                className="pointer-events-none h-28 w-28"
               />
             </div>
             
-            <div className="mt-4 flex flex-col gap-2 items-center">
-              <div className="flex items-center gap-1.5 text-sm">
-                <Info size={14} className="text-muted-foreground" />
+            <div className="mt-2 flex flex-col gap-1 items-center">
+              <div className="flex items-center gap-1 text-xs">
+                <Info size={12} className="text-muted-foreground" />
                 <span className="text-muted-foreground font-medium">
                   {getRecommendationContext()}
                 </span>
               </div>
               
-              <div className="text-center text-sm text-muted-foreground">
+              <div className="text-center text-xs text-muted-foreground">
                 Based on {Math.min(pitches.length, 5)} previous {pitches.length === 1 ? 'pitch' : 'pitches'}
               </div>
             </div>
             
-            <div className="mt-6 flex justify-center">
+            <div className="mt-3 flex justify-center">
               <Button 
                 onClick={handleCopyRecommendation}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 text-xs py-1 px-3 h-auto"
                 variant="secondary"
+                size="sm"
               >
-                <Copy size={16} />
+                <Copy size={12} />
                 Use This Recommendation
               </Button>
             </div>

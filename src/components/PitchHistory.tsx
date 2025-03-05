@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -46,12 +47,12 @@ const groupPitchesByAtBat = (pitches: Pitch[]) => {
 const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
   if (pitches.length === 0) {
     return (
-      <Card className="w-full h-[350px] shadow-sm bg-card/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-xl font-medium">Pitch History</CardTitle>
+      <Card className="w-full h-[280px] shadow-sm bg-card/80 backdrop-blur-sm">
+        <CardHeader className="pb-1 pt-3">
+          <CardTitle className="text-lg font-medium">Pitch History</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+        <CardContent className="py-2">
+          <div className="h-[220px] flex items-center justify-center text-muted-foreground">
             No pitches recorded yet
           </div>
         </CardContent>
@@ -62,13 +63,13 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
   const atBatGroups = groupPitchesByAtBat(pitches);
 
   return (
-    <Card className="w-full h-[350px] shadow-sm bg-card/80 backdrop-blur-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium">Pitch History</CardTitle>
+    <Card className="w-full h-[280px] shadow-sm bg-card/80 backdrop-blur-sm">
+      <CardHeader className="pb-1 pt-3">
+        <CardTitle className="text-lg font-medium">Pitch History</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[250px] pr-4">
-          <div className="space-y-3">
+      <CardContent className="py-2">
+        <ScrollArea className="h-[220px] pr-4">
+          <div className="space-y-2">
             {atBatGroups.map((group, groupIndex) => {
               const lastPitch = group[group.length - 1];
               const atBatResult = lastPitch.atBatResult;
@@ -83,51 +84,51 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                     isLatestGroup ? "border-accent/50 bg-accent/5" : "border-gray-200 bg-white/70"
                   )}
                 >
-                  <CollapsibleTrigger className="w-full p-3 flex justify-between items-center text-left">
+                  <CollapsibleTrigger className="w-full p-2 flex justify-between items-center text-left">
                     <div className="flex flex-col">
-                      <div className="font-medium">
+                      <div className="font-medium text-sm">
                         At-bat #{atBatGroups.length - groupIndex}
                       </div>
                       {atBatResult && (
-                        <span className="text-sm font-medium text-primary">
+                        <span className="text-xs font-medium text-primary">
                           Result: {atBatResult}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">
+                      <Badge variant="outline" className="text-xs">
                         {group.length} {group.length === 1 ? 'pitch' : 'pitches'}
                       </Badge>
-                      <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                      <ChevronDown className="h-3 w-3 transition-transform duration-200" />
                     </div>
                   </CollapsibleTrigger>
                   
                   <CollapsibleContent>
-                    <div className="px-3 pb-3 space-y-3">
+                    <div className="px-2 pb-2 space-y-2">
                       {group.map((pitch, index) => (
                         <div 
                           key={pitch.id}
                           className={cn(
-                            "p-3 rounded-lg border bg-white/80",
+                            "p-2 rounded-lg border bg-white/80",
                             index === group.length - 1 && pitch.atBatResult ? "border-primary/20" : "border-gray-100"
                           )}
                         >
                           <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <div className="font-medium">{pitch.type}</div>
-                              <div className="text-sm text-muted-foreground">{pitch.location}</div>
+                            <div className="space-y-0.5">
+                              <div className="font-medium text-sm">{pitch.type}</div>
+                              <div className="text-xs text-muted-foreground">{pitch.location}</div>
                               
                               {pitch.count && (
-                                <div className="space-y-1 mt-1">
+                                <div className="space-y-0.5 mt-1">
                                   <div className="flex items-center gap-1">
                                     <span className="text-xs text-muted-foreground">Count before:</span>
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge variant="outline" className="text-xs py-0 px-1">
                                       {pitch.count.before.balls}-{pitch.count.before.strikes}
                                     </Badge>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <span className="text-xs text-muted-foreground">Count after:</span>
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge variant="outline" className="text-xs py-0 px-1">
                                       {pitch.count.after.balls}-{pitch.count.after.strikes}
                                     </Badge>
                                   </div>
@@ -135,7 +136,7 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                               )}
                             </div>
                             <div className={cn(
-                              "px-2 py-1 text-xs font-medium rounded text-white",
+                              "px-1.5 py-0.5 text-xs font-medium rounded text-white",
                               getResultColor(pitch.result)
                             )}>
                               {pitch.result}
@@ -143,12 +144,12 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                           </div>
                           
                           {pitch.atBatResult && (
-                            <div className="mt-2 text-sm font-medium text-primary">
+                            <div className="mt-1 text-xs font-medium text-primary">
                               At-bat result: {pitch.atBatResult}
                             </div>
                           )}
                           
-                          <div className="mt-3 w-20 h-20 border border-gray-200 rounded grid grid-cols-3 grid-rows-3 overflow-hidden mx-auto">
+                          <div className="mt-2 w-16 h-16 border border-gray-200 rounded grid grid-cols-3 grid-rows-3 overflow-hidden mx-auto">
                             {['High Inside', 'High Middle', 'High Outside',
                               'Middle Inside', 'Middle Middle', 'Middle Outside',
                               'Low Inside', 'Low Middle', 'Low Outside'].map((zone) => {

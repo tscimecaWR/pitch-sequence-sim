@@ -103,32 +103,32 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/50">
-      <div className="container px-4 py-8 mx-auto">
-        <header className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Pitch Sequence Simulator</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
+      <div className="container px-4 py-4 mx-auto">
+        <header className="text-center mb-4 animate-fade-in">
+          <h1 className="text-3xl font-bold tracking-tight mb-1">Pitch Sequence Simulator</h1>
+          <p className="text-muted-foreground text-sm max-w-xl mx-auto">
             Input your pitch data to receive intelligent recommendations for your next pitch based on sequence analysis.
           </p>
         </header>
         
-        <div className="max-w-6xl mx-auto mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-medium">Current Count</h2>
+        <div className="max-w-6xl mx-auto mb-4">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-lg font-medium">Current Count</h2>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={resetCount} 
-              className="text-muted-foreground"
+              className="text-muted-foreground text-xs py-1"
             >
-              <RefreshCw className="mr-1 size-4" />
+              <RefreshCw className="mr-1 size-3" />
               Reset Count
             </Button>
           </div>
           <CountTracker balls={balls} strikes={strikes} />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          <div className="space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
+          <div className="space-y-4 animate-slide-up" style={{ animationDelay: '100ms' }}>
             <PitchInput 
               onAddPitch={handleAddPitch} 
               selectedType={selectedType}
@@ -138,7 +138,7 @@ const Index = () => {
             />
           </div>
           
-          <div className="space-y-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="space-y-4 animate-slide-up" style={{ animationDelay: '200ms' }}>
             <PitchRecommendation 
               pitches={pitches} 
               onLoadRecommendation={handleLoadRecommendation}
