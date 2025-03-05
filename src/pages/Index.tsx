@@ -122,7 +122,7 @@ const Index = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          <div className="space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <div className="space-y-6 animate-slide-up w-full" style={{ animationDelay: '100ms' }}>
             <PitchInput 
               onAddPitch={handleAddPitch} 
               selectedType={selectedType}
