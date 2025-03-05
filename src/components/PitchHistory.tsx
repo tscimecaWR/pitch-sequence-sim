@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Pitch } from '../types/pitch';
 import { getResultColor, getPitchZoneCoordinates } from '../utils/pitchUtils';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface PitchHistoryProps {
   pitches: Pitch[];
@@ -50,6 +51,16 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                     <div className="space-y-1">
                       <div className="font-medium">{pitch.type}</div>
                       <div className="text-sm text-muted-foreground">{pitch.location}</div>
+                      
+                      {/* Count display */}
+                      {pitch.count && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-xs text-muted-foreground">Count:</span>
+                          <Badge variant="outline" className="text-xs">
+                            {pitch.count.balls}-{pitch.count.strikes}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                     <div className={cn(
                       "px-2 py-1 text-xs font-medium rounded text-white",
@@ -58,6 +69,13 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                       {pitch.result}
                     </div>
                   </div>
+                  
+                  {/* At-bat result display */}
+                  {pitch.atBatResult && (
+                    <div className="mt-2 text-sm font-medium text-primary">
+                      At-bat result: {pitch.atBatResult}
+                    </div>
+                  )}
                   
                   {/* Mini pitch zone visualization */}
                   <div className="mt-3 w-20 h-20 border border-gray-200 rounded grid grid-cols-3 grid-rows-3 overflow-hidden mx-auto">

@@ -17,31 +17,59 @@ const Index = () => {
   const [strikes, setStrikes] = useState<number>(0);
 
   const handleAddPitch = (pitch: Pitch) => {
-    setPitches((prevPitches) => [...prevPitches, pitch]);
+    // Add count information to the pitch
+    const pitchWithCount = {
+      ...pitch,
+      count: {
+        balls,
+        strikes,
+      }
+    };
     
     // Update the count based on the pitch result
+    let newBalls = balls;
+    let newStrikes = strikes;
+    let atBatResult: string | undefined;
+    
     if (pitch.result === 'Ball') {
-      setBalls(prev => Math.min(prev + 1, 4));
+      newBalls = Math.min(balls + 1, 4);
+      setBalls(newBalls);
     } else if (pitch.result === 'Strike' || pitch.result === 'Foul') {
       // In baseball, foul balls can only count as strikes until there are 2 strikes
       if (pitch.result === 'Foul' && strikes === 2) {
         // Do nothing, foul with 2 strikes doesn't add a strike
       } else {
-        setStrikes(prev => Math.min(prev + 1, 3));
+        newStrikes = Math.min(strikes + 1, 3);
+        setStrikes(newStrikes);
       }
     }
     
-    // Check if the at-bat is over
+    // Check if the at-bat is over and set the at-bat result
     if (balls === 3 && pitch.result === 'Ball') {
+      atBatResult = "Walk";
       toast.info("Walk!", { description: "Batter takes first base on balls" });
       resetCount();
     } else if (strikes === 2 && (pitch.result === 'Strike')) {
+      atBatResult = "Strikeout";
       toast.info("Strikeout!", { description: "Batter struck out" });
       resetCount();
-    } else if (pitch.result === 'Hit' || pitch.result === 'Out' || pitch.result === 'Home Run') {
-      // At-bat ends on these results too
+    } else if (pitch.result === 'Hit') {
+      atBatResult = "Hit";
+      resetCount();
+    } else if (pitch.result === 'Out') {
+      atBatResult = "Out";
+      resetCount();
+    } else if (pitch.result === 'Home Run') {
+      atBatResult = "Home Run";
       resetCount();
     }
+    
+    // Add the at-bat result if the at-bat is over
+    if (atBatResult) {
+      pitchWithCount.atBatResult = atBatResult;
+    }
+    
+    setPitches((prevPitches) => [...prevPitches, pitchWithCount]);
     
     toast.success("Pitch added successfully", {
       description: `${pitch.type} - ${pitch.location} - ${pitch.result}`,

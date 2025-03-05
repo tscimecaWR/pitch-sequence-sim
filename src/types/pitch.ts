@@ -43,4 +43,9 @@ export interface Pitch {
   location: PitchLocation;
   result: PitchResult;
   timestamp: number;
+  count?: {
+    balls: number;
+    strikes: number;
+  };
+  atBatResult?: string;
 }
