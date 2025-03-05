@@ -78,6 +78,9 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
               const atBatResult = lastPitch.atBatResult;
               const isLatestGroup = groupIndex === 0;
               
+              // Reverse the pitches array to show most recent on top
+              const reversedPitches = [...group].reverse();
+              
               return (
                 <Collapsible 
                   key={groupIndex} 
@@ -108,15 +111,16 @@ const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
                   
                   <CollapsibleContent>
                     <div className="px-3 pb-3 space-y-3">
-                      {group.map((pitch, index) => {
+                      {reversedPitches.map((pitch, index) => {
                         const displayLocation = getDisplayLocation(pitch.location, pitch.batterHandedness);
+                        const isLastPitchInAtBat = index === 0 && pitch.atBatResult;
                         
                         return (
                           <div 
                             key={pitch.id}
                             className={cn(
                               "p-3 rounded-lg border bg-white/80",
-                              index === group.length - 1 && pitch.atBatResult ? "border-primary/20" : "border-gray-100"
+                              isLastPitchInAtBat ? "border-primary/20" : "border-gray-100"
                             )}
                           >
                             <div className="grid grid-cols-3 gap-4">
