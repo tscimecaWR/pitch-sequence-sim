@@ -11,11 +11,19 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface PitchInputProps {
   onAddPitch: (pitch: Pitch) => void;
+  selectedType: PitchType;
+  selectedLocation: PitchLocation;
+  setSelectedType: (type: PitchType) => void;
+  setSelectedLocation: (location: PitchLocation) => void;
 }
 
-const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
-  const [type, setType] = useState<PitchType>('Fastball');
-  const [location, setLocation] = useState<PitchLocation>('Middle Middle');
+const PitchInput: React.FC<PitchInputProps> = ({ 
+  onAddPitch, 
+  selectedType, 
+  selectedLocation, 
+  setSelectedType, 
+  setSelectedLocation 
+}) => {
   const [result, setResult] = useState<PitchResult>('Strike');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,8 +32,8 @@ const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
     
     const newPitch: Pitch = {
       id: generateId(),
-      type,
-      location,
+      type: selectedType,
+      location: selectedLocation,
       result,
       timestamp: Date.now()
     };
@@ -47,8 +55,8 @@ const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
         <div className="space-y-2">
           <label className="text-sm font-medium">Pitch Type</label>
           <RadioGroup 
-            value={type} 
-            onValueChange={(value) => setType(value as PitchType)} 
+            value={selectedType} 
+            onValueChange={(value) => setSelectedType(value as PitchType)} 
             className="grid grid-cols-3 gap-2"
           >
             {PITCH_TYPES.map((pitchType) => (
@@ -69,8 +77,8 @@ const PitchInput: React.FC<PitchInputProps> = ({ onAddPitch }) => {
           <label className="text-sm font-medium">Pitch Location</label>
           <div className="flex justify-center pt-2">
             <PitchZone
-              selectedLocation={location}
-              onSelectLocation={setLocation}
+              selectedLocation={selectedLocation}
+              onSelectLocation={setSelectedLocation}
               className="animate-scale-in"
             />
           </div>

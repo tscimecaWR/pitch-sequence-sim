@@ -5,12 +5,18 @@ import { Pitch, PitchType, PitchLocation } from '../types/pitch';
 import { recommendNextPitch } from '../utils/pitchUtils';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Copy } from 'lucide-react';
 
 interface PitchRecommendationProps {
   pitches: Pitch[];
+  onLoadRecommendation: (type: PitchType, location: PitchLocation) => void;
 }
 
-const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ pitches }) => {
+const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ 
+  pitches, 
+  onLoadRecommendation 
+}) => {
   const [recommendation, setRecommendation] = useState<{ type: PitchType; location: PitchLocation } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -30,6 +36,12 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ pitches }) =>
       setRecommendation(null);
     }
   }, [pitches]);
+
+  const handleCopyRecommendation = () => {
+    if (recommendation) {
+      onLoadRecommendation(recommendation.type, recommendation.location);
+    }
+  };
 
   if (pitches.length === 0) {
     return (
@@ -79,6 +91,17 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({ pitches }) =>
             
             <div className="mt-4 text-center text-sm text-muted-foreground">
               Based on {pitches.length} previous {pitches.length === 1 ? 'pitch' : 'pitches'}
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <Button 
+                onClick={handleCopyRecommendation}
+                className="flex items-center gap-2"
+                variant="secondary"
+              >
+                <Copy size={16} />
+                Use This Recommendation
+              </Button>
             </div>
           </div>
         ) : null}
