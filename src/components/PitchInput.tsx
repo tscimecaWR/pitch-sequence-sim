@@ -8,7 +8,6 @@ import { PITCH_TYPES, PITCH_LOCATIONS, PITCH_RESULTS, generateId } from '../util
 import PitchZone from './PitchZone';
 import { AnimatePresence, motion } from 'framer-motion';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { User, HandMetal } from 'lucide-react';
 
 interface PitchInputProps {
   onAddPitch: (pitch: Pitch) => void;
@@ -76,7 +75,13 @@ const PitchInput: React.FC<PitchInputProps> = ({
               onClick={toggleBatterHandedness}
               className="flex items-center gap-2 flex-1"
             >
-              <User size={16} />
+              <div className={`w-5 h-5 relative ${batterHandedness === 'Left' ? 'scale-x-[-1]' : ''}`}>
+                <img 
+                  src="/lovable-uploads/86911cef-1571-4281-8a11-7f6be2d9a96e.png" 
+                  alt="Batter" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
               {batterHandedness === 'Right' ? 'Right handed batter' : 'Left handed batter'}
             </Button>
             <Button 
@@ -85,7 +90,13 @@ const PitchInput: React.FC<PitchInputProps> = ({
               onClick={togglePitcherHandedness}
               className="flex items-center gap-2 flex-1"
             >
-              <HandMetal size={16} />
+              <div className={`w-5 h-5 relative ${pitcherHandedness === 'Left' ? 'scale-x-[-1]' : ''}`}>
+                <img 
+                  src="/lovable-uploads/5192d19e-cf1d-411f-a5e2-c1046a34522d.png" 
+                  alt="Pitcher" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
               {pitcherHandedness === 'Right' ? 'Right handed pitcher' : 'Left handed pitcher'}
             </Button>
           </div>
