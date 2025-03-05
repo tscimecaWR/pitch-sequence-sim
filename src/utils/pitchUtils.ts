@@ -1,3 +1,4 @@
+
 import { Pitch, PitchType, PitchLocation, PitchResult } from '../types/pitch';
 
 // Generate a unique ID
@@ -217,12 +218,15 @@ function applyPatternRecognition(
   }
   
   // 4. Analyze batter's success against different pitches
-  const pitchEffectiveness: Record<PitchType, { success: number, total: number }> = {};
-  
-  // Initialize tracking for each pitch type
-  PITCH_TYPES.forEach(type => {
-    pitchEffectiveness[type] = { success: 0, total: 0 };
-  });
+  const pitchEffectiveness: Record<PitchType, { success: number, total: number }> = {
+    'Fastball': { success: 0, total: 0 },
+    'Curveball': { success: 0, total: 0 },
+    'Slider': { success: 0, total: 0 },
+    'Changeup': { success: 0, total: 0 },
+    'Cutter': { success: 0, total: 0 },
+    'Sinker': { success: 0, total: 0 },
+    'Splitter': { success: 0, total: 0 }
+  };
   
   // Calculate success rate for each pitch type
   pitches.forEach(pitch => {
