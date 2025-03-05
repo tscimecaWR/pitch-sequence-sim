@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,34 +15,32 @@ interface PitchHistoryProps {
 const groupPitchesByAtBat = (pitches: Pitch[]) => {
   const groups: Pitch[][] = [];
   let currentGroup: Pitch[] = [];
-
-  // Create a copy of pitches and reverse them to process oldest first
-  const chronologicalPitches = [...pitches].reverse();
   
-  chronologicalPitches.forEach((pitch) => {
-    if (currentGroup.length === 0) {
-      // Start a new group
+  // Process pitches in chronological order
+  const chronologicalPitches = [...pitches];
+  
+  for (let i = 0; i < chronologicalPitches.length; i++) {
+    const pitch = chronologicalPitches[i];
+    
+    // Start a new at-bat when:
+    // 1. This is the first pitch overall
+    // 2. The previous pitch ended an at-bat (has an atBatResult)
+    // 3. The count was reset to 0-0 (indicating a new at-bat)
+    const isPreviousPitchAtBatEnd = i > 0 && chronologicalPitches[i-1].atBatResult !== undefined;
+    const isNewCount = pitch.count?.before.balls === 0 && pitch.count?.before.strikes === 0;
+    
+    if (i === 0 || isPreviousPitchAtBatEnd || isNewCount) {
+      // Start a new at-bat group
       currentGroup = [pitch];
       groups.push(currentGroup);
     } else {
-      // Check if the previous pitch ended an at-bat
-      const previousPitch = currentGroup[currentGroup.length - 1];
-      const isAtBatEnded = previousPitch.atBatResult !== undefined;
-      
-      if (isAtBatEnded) {
-        // Start a new group if the previous pitch ended an at-bat
-        currentGroup = [pitch];
-        groups.push(currentGroup);
-      } else {
-        // Add to current group
-        currentGroup.push(pitch);
-      }
+      // Continue current at-bat
+      currentGroup.push(pitch);
     }
-  });
-
-  // Reverse each group and the groups array to get chronological order within at-bats
-  // but with the most recent at-bat first
-  return groups.map(group => group.reverse()).reverse();
+  }
+  
+  // Reverse the groups array so the most recent at-bat appears first
+  return groups.reverse();
 };
 
 const PitchHistory: React.FC<PitchHistoryProps> = ({ pitches }) => {
