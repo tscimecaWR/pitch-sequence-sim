@@ -159,17 +159,30 @@ const DataUploader = () => {
     }
     
     const hasLocationColumn = header.includes('Location');
-    const hasPlateXColumn = header.includes('PlateX') || header.includes('plate_x') || header.includes('px');
-    const hasPlateZColumn = header.includes('PlateZ') || header.includes('plate_z') || header.includes('pz');
-    const hasCoordinateInfo = hasPlateXColumn && hasPlateZColumn;
+    
+    const hasPlateXColumn = header.includes('PlateX') || 
+                           header.includes('plate_x') || 
+                           header.includes('px');
+                           
+    const hasPlateLocSideColumn = header.includes('PlateLocSide');
+    
+    const hasPlateZColumn = header.includes('PlateZ') || 
+                           header.includes('plate_z') || 
+                           header.includes('pz');
+                           
+    const hasPlateLocHeightColumn = header.includes('PlateLocHeight');
+    
+    const hasHorizontalCoordinate = hasPlateXColumn || hasPlateLocSideColumn;
+    const hasVerticalCoordinate = hasPlateZColumn || hasPlateLocHeightColumn;
+    const hasCoordinateInfo = hasHorizontalCoordinate && hasVerticalCoordinate;
     
     if (!hasLocationColumn && !hasCoordinateInfo) {
-      throw new Error('Missing required column: Either "Location" or both coordinate columns (PlateX/plate_x/px and PlateZ/plate_z/pz) must be present');
+      throw new Error('Missing required column: Either "Location" or coordinate columns (PlateX/plate_x/px/PlateLocSide and PlateZ/plate_z/pz/PlateLocHeight) must be present');
     }
     
     let coordinateSystem: 'statcast' | 'trackman' | 'hawkeye' | 'normalized' = 'statcast';
     if (hasCoordinateInfo) {
-      if (header.includes('TaggedPitchType') || header.includes('SpinRate')) {
+      if (header.includes('TaggedPitchType') || header.includes('SpinRate') || hasPlateLocSideColumn || hasPlateLocHeightColumn) {
         coordinateSystem = 'trackman';
       } else if (header.includes('Extension') || header.includes('RelHeight')) {
         coordinateSystem = 'hawkeye';
@@ -187,13 +200,15 @@ const DataUploader = () => {
       columnIndices[column] = index;
     });
 
-    const plateXColumn = header.includes('PlateX') ? 'PlateX' : 
-                      header.includes('plate_x') ? 'plate_x' : 
-                      header.includes('PlateLocSide') ? 'PlateLocSide' : 'px';
+    const horizontalCoordColumn = header.includes('PlateX') ? 'PlateX' : 
+                              header.includes('plate_x') ? 'plate_x' : 
+                              header.includes('PlateLocSide') ? 'PlateLocSide' : 
+                              header.includes('px') ? 'px' : '';
     
-    const plateZColumn = header.includes('PlateZ') ? 'PlateZ' : 
-                      header.includes('plate_z') ? 'plate_z' : 
-                      header.includes('PlateLocHeight') ? 'PlateLocHeight' : 'pz';
+    const verticalCoordColumn = header.includes('PlateZ') ? 'PlateZ' : 
+                              header.includes('plate_z') ? 'plate_z' : 
+                              header.includes('PlateLocHeight') ? 'PlateLocHeight' : 
+                              header.includes('pz') ? 'pz' : '';
 
     const data: HistoricalPitchData[] = [];
 
@@ -250,9 +265,9 @@ const DataUploader = () => {
       if (hasLocationColumn) {
         const rawLocation = values[columnIndices['Location']];
         location = locationMap[rawLocation] || 'Middle Middle';
-      } else if (hasCoordinateInfo) {
-        const plateX = parseFloat(values[columnIndices[plateXColumn]]);
-        const plateZ = parseFloat(values[columnIndices[plateZColumn]]);
+      } else if (hasCoordinateInfo && horizontalCoordColumn && verticalCoordColumn) {
+        const plateX = parseFloat(values[columnIndices[horizontalCoordColumn]]);
+        const plateZ = parseFloat(values[columnIndices[verticalCoordColumn]]);
         
         if (!isNaN(plateX) && !isNaN(plateZ)) {
           location = convertCoordinatesToLocation(
@@ -291,11 +306,11 @@ const DataUploader = () => {
         }
       };
       
-      if (hasCoordinateInfo) {
+      if (hasCoordinateInfo && horizontalCoordColumn && verticalCoordColumn) {
         pitchRecord.metadata = {
           ...pitchRecord.metadata,
-          plateX: parseFloat(values[columnIndices[plateXColumn]]),
-          plateZ: parseFloat(values[columnIndices[plateZColumn]])
+          plateX: parseFloat(values[columnIndices[horizontalCoordColumn]]),
+          plateZ: parseFloat(values[columnIndices[verticalCoordColumn]])
         };
       }
       
