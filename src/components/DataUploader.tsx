@@ -110,8 +110,8 @@ const DataUploader = () => {
 
     const header = lines[0].split(',').map(h => h.trim());
     
-    // Validate required columns, but now accepting TaggedPitchType as an alternative to Pitch Type
-    const requiredBaseColumns = ['Date', 'Location', 'Count', 'Batter Stands', 'Pitcher Throws', 'Result'];
+    // Validate required columns, accepting alternative column names
+    const requiredBaseColumns = ['Date', 'Location', 'Count', 'Pitcher Throws', 'Result'];
     
     // Check if either Pitch Type or TaggedPitchType is present
     const hasPitchTypeColumn = header.includes('Pitch Type');
@@ -119,6 +119,14 @@ const DataUploader = () => {
     
     if (!hasPitchTypeColumn && !hasTaggedPitchTypeColumn) {
       throw new Error('Missing required column: Either "Pitch Type" or "TaggedPitchType" must be present');
+    }
+    
+    // Check if either Batter Stands or BatterSide is present
+    const hasBatterStandsColumn = header.includes('Batter Stands');
+    const hasBatterSideColumn = header.includes('BatterSide');
+    
+    if (!hasBatterStandsColumn && !hasBatterSideColumn) {
+      throw new Error('Missing required column: Either "Batter Stands" or "BatterSide" must be present');
     }
     
     // Check other required columns
@@ -147,8 +155,15 @@ const DataUploader = () => {
       const countStr = values[columnIndices['Count']];
       const [balls, strikes] = countStr.split('-').map(Number);
       
-      // Get pitcher and batter handedness
-      const batterHandedness = values[columnIndices['Batter Stands']] === 'R' ? 'Right' : 'Left';
+      // Get pitcher and batter handedness, now checking both possible column names for batter
+      let batterStands = '';
+      if (hasBatterStandsColumn) {
+        batterStands = values[columnIndices['Batter Stands']];
+      } else if (hasBatterSideColumn) {
+        batterStands = values[columnIndices['BatterSide']];
+      }
+      
+      const batterHandedness = batterStands === 'R' ? 'Right' : 'Left';
       const pitcherHandedness = values[columnIndices['Pitcher Throws']] === 'R' ? 'Right' : 'Left';
       
       // Map pitch type from full name to internal type, now checking both possible column names
