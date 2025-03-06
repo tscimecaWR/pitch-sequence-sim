@@ -181,8 +181,8 @@ export const recommendNextPitch = (
   debugInfo.mergedScores = mergedScores;
   
   // Use the merged scores for final recommendation
-  const bestPitchType = findHighestScoringKey(mergedScores.typeScores);
-  const bestLocation = findHighestScoringKey(mergedScores.locationScores);
+  const bestPitchType = findHighestScoringKey(mergedScores.typeScores) as PitchType;
+  const bestLocation = findHighestScoringKey(mergedScores.locationScores) as PitchLocation;
   
   // Final validation - if we still ended up with slider/changeup in top half, force a recalculation
   if (pitchTypesToAvoidHigh.includes(bestPitchType) && topHalfLocations.includes(bestLocation)) {
