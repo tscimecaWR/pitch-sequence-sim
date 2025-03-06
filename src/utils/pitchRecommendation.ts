@@ -1,4 +1,3 @@
-
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
 import { 
   applyCountBasedScoring, 
@@ -189,7 +188,7 @@ export const recommendNextPitch = (
     // Force a different location by finding the best location that's not in the top half
     const validLocations = Object.entries(mergedScores.locationScores)
       .filter(([loc, _]) => !topHalfLocations.includes(loc as PitchLocation))
-      .sort((a, b) => b[1] - a[1]);
+      .sort((a, b) => Number(b[1]) - Number(a[1]));
     
     if (validLocations.length > 0) {
       // Use the best scoring non-top-half location

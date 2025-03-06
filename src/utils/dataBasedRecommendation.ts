@@ -2,6 +2,7 @@
 import { HistoricalPitchData, CurrentPitchSituation, DataDrivenRecommendationResult } from '../types/historicalData';
 import { getDataDrivenRecommendation } from './historicalDataAnalysis';
 import { importHistoricalData } from './historicalDataImport';
+import { addRandomness, promoteVariety } from './randomizationUtils';
 
 // Re-export types and functions
 export { 
@@ -26,9 +27,6 @@ export const mergeRecommendationScores = (
     recentLocations?: string[];
   } = {}
 ) => {
-  // Import here to avoid circular dependency
-  const { addRandomness, promoteVariety } = require('./randomizationUtils');
-  
   const { 
     randomness = 0.15,
     recentPitchTypes = [],
