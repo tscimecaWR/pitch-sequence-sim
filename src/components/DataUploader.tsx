@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,6 +57,19 @@ const DataUploader = () => {
     'In Play - HR': 'Unsuccessful'
   };
 
+  // New map for PitchCall values
+  const pitchCallMap: Record<string, 'Successful' | 'Unsuccessful'> = {
+    'StrikeCalled': 'Successful',
+    'StrikeSwinging': 'Successful',
+    'FoulBall': 'Successful',
+    'InPlay': 'Successful',
+    'Ball': 'Unsuccessful',
+    'BallHBP': 'Unsuccessful',
+    'InPlayHit': 'Unsuccessful',
+    'InPlayHomeRun': 'Unsuccessful',
+    'BallinDirt': 'Unsuccessful'
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -106,7 +120,7 @@ const DataUploader = () => {
 
     const header = lines[0].split(',').map(h => h.trim());
     
-    const requiredBaseColumns = ['Date', 'Location', 'Result'];
+    const requiredBaseColumns = ['Date', 'Location'];
     
     const hasCountColumn = header.includes('Count');
     const hasBallsColumn = header.includes('Balls');
@@ -136,6 +150,13 @@ const DataUploader = () => {
     
     if (!hasPitcherThrowsColumn && !hasPitcherThrowsAltColumn) {
       throw new Error('Missing required column: Either "Pitcher Throws" or "PitcherThrows" must be present');
+    }
+    
+    const hasResultColumn = header.includes('Result');
+    const hasPitchCallColumn = header.includes('PitchCall');
+    
+    if (!hasResultColumn && !hasPitchCallColumn) {
+      throw new Error('Missing required column: Either "Result" or "PitchCall" must be present');
     }
     
     const missingColumns = requiredBaseColumns.filter(col => !header.includes(col));
@@ -202,8 +223,15 @@ const DataUploader = () => {
       const rawLocation = values[columnIndices['Location']];
       const location = locationMap[rawLocation] || 'Middle Middle';
       
-      const rawResult = values[columnIndices['Result']];
-      const result = resultMap[rawResult] || 'Unsuccessful';
+      let result: 'Successful' | 'Unsuccessful' = 'Unsuccessful';
+      
+      if (hasResultColumn) {
+        const rawResult = values[columnIndices['Result']];
+        result = resultMap[rawResult] || 'Unsuccessful';
+      } else if (hasPitchCallColumn) {
+        const rawPitchCall = values[columnIndices['PitchCall']];
+        result = pitchCallMap[rawPitchCall] || 'Unsuccessful';
+      }
 
       const pitchRecord: HistoricalPitchData = {
         type: pitchType as PitchType,
