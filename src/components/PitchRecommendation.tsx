@@ -6,7 +6,7 @@ import { recommendNextPitch } from '../utils/pitchRecommendation';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Info, LineChart } from 'lucide-react';
+import { Copy, Info, LineChart, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PitchRecommendationProps {
@@ -26,6 +26,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     type: PitchType; 
     location: PitchLocation;
     insights?: string[];
+    pitcherNames?: string[];
   } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -153,6 +154,30 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                   {getRecommendationContext()}
                 </span>
               </div>
+              
+              {/* Pitcher names section */}
+              {recommendation.pitcherNames && recommendation.pitcherNames.length > 0 && (
+                <div className="w-full mt-2 p-2 bg-blue-500/10 rounded-lg">
+                  <div className="text-sm font-medium mb-1 flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                    <User size={14} />
+                    {recommendation.pitcherNames.length === 1 
+                      ? 'Pitcher Used This Approach:' 
+                      : 'Pitchers Used This Approach:'}
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {recommendation.pitcherNames.slice(0, 5).map((name, idx) => (
+                      <Badge key={idx} variant="outline" className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                        {name}
+                      </Badge>
+                    ))}
+                    {recommendation.pitcherNames.length > 5 && (
+                      <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                        +{recommendation.pitcherNames.length - 5} more
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
               
               {/* Data-driven insights section */}
               {recommendation.insights && recommendation.insights.length > 0 && (
