@@ -1,3 +1,4 @@
+
 import { PitchType, PitchLocation, Pitch } from '../../types/pitch';
 
 // Pattern Recognition - Analyze previous pitches for patterns
@@ -95,6 +96,27 @@ export function applyPatternRecognition(
       const successRate = data.success / data.total;
       // Boost pitch types that have been successful
       pitchTypeScores[type as PitchType] += Math.round(successRate * 4);
+    }
+  });
+  
+  // 5. Avoid throwing sliders and changeups in the top half of the zone
+  const topHalfLocations: PitchLocation[] = [
+    'High Inside', 'High Middle', 'High Outside',
+    'Way High Inside', 'Way High', 'Way High Outside'
+  ];
+  
+  // Apply heavy penalties to slider and changeup in top half locations
+  topHalfLocations.forEach(location => {
+    if (pitchTypeScores['Slider'] && locationScores[location]) {
+      if (locationScores[location] > -10) { // Prevent double penalties
+        locationScores[location] -= 5; // Apply location penalty for sliders
+      }
+    }
+    
+    if (pitchTypeScores['Changeup'] && locationScores[location]) {
+      if (locationScores[location] > -10) { // Prevent double penalties
+        locationScores[location] -= 5; // Apply location penalty for changeups
+      }
     }
   });
 }

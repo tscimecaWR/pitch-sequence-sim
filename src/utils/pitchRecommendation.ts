@@ -1,3 +1,4 @@
+
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
 import { 
   applyCountBasedScoring, 
@@ -83,6 +84,32 @@ export const recommendNextPitch = (
   // 1.3 Apply handedness-based recommendations
   applyHandednessScoring(pitchTypeScores, locationScores, batterHandedness, pitcherHandedness);
 
+  // 1.4 Apply specific rules to avoid sliders and changeups in the top half of the zone
+  const topHalfLocations: PitchLocation[] = [
+    'High Inside', 'High Middle', 'High Outside',
+    'Way High Inside', 'Way High', 'Way High Outside'
+  ];
+  
+  // Direct override - heavily penalize these combinations regardless of other factors
+  const pitchTypesToAvoidHigh: PitchType[] = ['Slider', 'Changeup'];
+  
+  // Add extra insights for the avoidance rule
+  let avoidanceInsights: string[] = [];
+  
+  // Apply direct penalties to avoid these combinations
+  for (const pitchType of pitchTypesToAvoidHigh) {
+    for (const location of topHalfLocations) {
+      // Apply a strong direct penalty that will generally avoid this combination
+      locationScores[location] -= 10;
+      
+      // If this would be the chosen combination, add an insight
+      if (pitchTypeScores[pitchType] === Math.max(...Object.values(pitchTypeScores)) &&
+          locationScores[location] === Math.max(...Object.values(locationScores))) {
+        avoidanceInsights.push(`Avoiding ${pitchType} in ${location} location (elevated location risk)`);
+      }
+    }
+  }
+
   // Store rule-based scores
   const ruleBasedScores = {
     typeScores: { ...pitchTypeScores },
@@ -110,11 +137,40 @@ export const recommendNextPitch = (
   // Use the merged scores for final recommendation
   const bestPitchType = findHighestScoringKey(mergedScores.typeScores);
   const bestLocation = findHighestScoringKey(mergedScores.locationScores);
+  
+  // Final validation - if we still ended up with slider/changeup in top half, force a recalculation
+  if (pitchTypesToAvoidHigh.includes(bestPitchType) && topHalfLocations.includes(bestLocation)) {
+    // Force a different location by finding the best location that's not in the top half
+    const validLocations = Object.entries(mergedScores.locationScores)
+      .filter(([loc, _]) => !topHalfLocations.includes(loc as PitchLocation))
+      .sort((a, b) => b[1] - a[1]);
+    
+    if (validLocations.length > 0) {
+      // Use the best scoring non-top-half location
+      const bestAlternativeLocation = validLocations[0][0] as PitchLocation;
+      
+      // Add insight about the override
+      avoidanceInsights.push(`Relocated ${bestPitchType} from ${bestLocation} to ${bestAlternativeLocation} (top half avoidance rule)`);
+      
+      // Return with override
+      return {
+        type: bestPitchType,
+        location: bestAlternativeLocation,
+        insights: includeInsights ? [...(insights || []), ...avoidanceInsights] : undefined,
+        pitcherNames
+      };
+    }
+  }
+
+  // Add any avoidance insights to the final insights
+  const finalInsights = includeInsights ? 
+    [...(insights || []), ...avoidanceInsights] : 
+    undefined;
 
   return {
     type: bestPitchType,
     location: bestLocation,
-    insights: includeInsights ? insights : undefined,
+    insights: finalInsights,
     pitcherNames
   };
 };
