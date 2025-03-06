@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
@@ -6,7 +5,7 @@ import { recommendNextPitch } from '../utils/pitchRecommendation';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Info, LineChart, User } from 'lucide-react';
+import { Copy, Info, LineChart, User, Eye, EyeOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PitchRecommendationProps {
@@ -29,20 +28,18 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     pitcherNames?: string[];
   } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
 
-  // Get the current count for context
   const getCurrentCount = () => {
     if (pitches.length === 0) return { balls: 0, strikes: 0 };
     const lastPitch = pitches[pitches.length - 1];
     return lastPitch.count?.after || { balls: 0, strikes: 0 };
   };
 
-  // Get recommendation context based on count
   const getRecommendationContext = () => {
     const count = getCurrentCount();
     const { balls, strikes } = count;
     
-    // Add handedness matchup context
     const handednessMatchup = batterHandedness === pitcherHandedness 
       ? `Same-side matchup (${pitcherHandedness}-handed pitcher vs ${batterHandedness}-handed batter)`
       : `Opposite-side matchup (${pitcherHandedness}-handed pitcher vs ${batterHandedness}-handed batter)`;
@@ -57,13 +54,10 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
   };
 
   useEffect(() => {
-    // Only recalculate if we have pitches
     if (pitches.length > 0) {
       setIsCalculating(true);
       
-      // Add a small delay to simulate calculation and create a nice animation effect
       const timer = setTimeout(() => {
-        // Make sure the latest pitch has the current handedness
         const updatedPitches = [...pitches];
         if (updatedPitches.length > 0) {
           const lastIndex = updatedPitches.length - 1;
@@ -155,7 +149,6 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                 </span>
               </div>
               
-              {/* Pitcher names section */}
               {recommendation.pitcherNames && recommendation.pitcherNames.length > 0 && (
                 <div className="w-full mt-2 p-2 bg-blue-500/10 rounded-lg">
                   <div className="text-sm font-medium mb-1 flex items-center gap-1 text-blue-600 dark:text-blue-400">
@@ -179,21 +172,33 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                 </div>
               )}
               
-              {/* Data-driven insights section */}
               {recommendation.insights && recommendation.insights.length > 0 && (
-                <div className="w-full mt-2 p-3 bg-primary/5 rounded-lg">
-                  <div className="text-sm font-medium mb-1 flex items-center gap-1">
-                    <LineChart size={14} className="text-primary" />
-                    Data-Driven Insights:
+                <div className="w-full mt-2">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                    onClick={() => setShowInsights(!showInsights)}
+                  >
+                    <div className="text-sm font-medium flex items-center gap-1">
+                      <LineChart size={14} className="text-primary" />
+                      Data-Driven Insights
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      {showInsights ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </Button>
                   </div>
-                  <ul className="space-y-1">
-                    {recommendation.insights.map((insight, index) => (
-                      <li key={index} className="text-xs text-muted-foreground flex items-start gap-1">
-                        <span className="inline-block rounded-full h-1.5 w-1.5 bg-primary mt-1.5 flex-shrink-0" />
-                        {insight}
-                      </li>
-                    ))}
-                  </ul>
+                  
+                  {showInsights && (
+                    <div className="p-3 bg-primary/5 rounded-lg mt-1">
+                      <ul className="space-y-1">
+                        {recommendation.insights.map((insight, index) => (
+                          <li key={index} className="text-xs text-muted-foreground flex items-start gap-1">
+                            <span className="inline-block rounded-full h-1.5 w-1.5 bg-primary mt-1.5 flex-shrink-0" />
+                            {insight}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
               
