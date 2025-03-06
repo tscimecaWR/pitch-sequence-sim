@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
@@ -5,7 +6,7 @@ import { recommendNextPitch } from '../utils/pitchRecommendation';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Info, LineChart, Database } from 'lucide-react';
+import { Copy, Info, LineChart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PitchRecommendationProps {
@@ -25,20 +26,22 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     type: PitchType; 
     location: PitchLocation;
     insights?: string[];
-    pitcherNames?: string[];
   } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
+  // Get the current count for context
   const getCurrentCount = () => {
     if (pitches.length === 0) return { balls: 0, strikes: 0 };
     const lastPitch = pitches[pitches.length - 1];
     return lastPitch.count?.after || { balls: 0, strikes: 0 };
   };
 
+  // Get recommendation context based on count
   const getRecommendationContext = () => {
     const count = getCurrentCount();
     const { balls, strikes } = count;
     
+    // Add handedness matchup context
     const handednessMatchup = batterHandedness === pitcherHandedness 
       ? `Same-side matchup (${pitcherHandedness}-handed pitcher vs ${batterHandedness}-handed batter)`
       : `Opposite-side matchup (${pitcherHandedness}-handed pitcher vs ${batterHandedness}-handed batter)`;
@@ -53,10 +56,13 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
   };
 
   useEffect(() => {
+    // Only recalculate if we have pitches
     if (pitches.length > 0) {
       setIsCalculating(true);
       
+      // Add a small delay to simulate calculation and create a nice animation effect
       const timer = setTimeout(() => {
+        // Make sure the latest pitch has the current handedness
         const updatedPitches = [...pitches];
         if (updatedPitches.length > 0) {
           const lastIndex = updatedPitches.length - 1;
@@ -148,6 +154,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                 </span>
               </div>
               
+              {/* Data-driven insights section */}
               {recommendation.insights && recommendation.insights.length > 0 && (
                 <div className="w-full mt-2 p-3 bg-primary/5 rounded-lg">
                   <div className="text-sm font-medium mb-1 flex items-center gap-1">
@@ -161,28 +168,6 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                         {insight}
                       </li>
                     ))}
-                  </ul>
-                </div>
-              )}
-              
-              {recommendation.pitcherNames && recommendation.pitcherNames.length > 0 && (
-                <div className="w-full mt-2 p-3 bg-blue-500/10 rounded-lg">
-                  <div className="text-sm font-medium mb-1 flex items-center gap-1">
-                    <Database size={14} className="text-blue-500" />
-                    Based on uploaded data from:
-                  </div>
-                  <ul className="space-y-0.5">
-                    {recommendation.pitcherNames.slice(0, 3).map((pitcher, index) => (
-                      <li key={index} className="text-xs text-muted-foreground flex items-start gap-1">
-                        <span className="inline-block rounded-full h-1.5 w-1.5 bg-blue-500 mt-1.5 flex-shrink-0" />
-                        {pitcher}
-                      </li>
-                    ))}
-                    {recommendation.pitcherNames.length > 3 && (
-                      <li className="text-xs text-muted-foreground italic">
-                        And {recommendation.pitcherNames.length - 3} more pitcher{recommendation.pitcherNames.length - 3 > 1 ? 's' : ''}
-                      </li>
-                    )}
                   </ul>
                 </div>
               )}
