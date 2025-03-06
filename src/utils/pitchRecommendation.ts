@@ -1,4 +1,3 @@
-
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
 import { 
   applyCountBasedScoring, 
