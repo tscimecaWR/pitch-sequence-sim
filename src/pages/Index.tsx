@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import PitchInput from '@/components/PitchInput';
 import PitchHistory from '@/components/PitchHistory';
 import PitchRecommendation from '@/components/PitchRecommendation';
 import CountTracker from '@/components/CountTracker';
+import DataUploader from '@/components/DataUploader';
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '@/types/pitch';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -134,6 +136,10 @@ const Index = () => {
                 pitcherHandedness={pitcherHandedness}
                 setPitcherHandedness={setPitcherHandedness}
               />
+            </div>
+            
+            <div className="w-full">
+              <DataUploader />
             </div>
           </div>
           
