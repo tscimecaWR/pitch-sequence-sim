@@ -12,15 +12,6 @@ import {
   HistoricalPitchData 
 } from './dataBasedRecommendation';
 
-// Static variable to hold historical data once loaded
-let historicalPitchData: HistoricalPitchData[] = [];
-
-// Function to set historical data
-export const setHistoricalPitchData = (data: HistoricalPitchData[]): void => {
-  historicalPitchData = data;
-  console.log(`Loaded ${data.length} historical pitch records`);
-};
-
 // Enhanced recommendation logic using both rule-based and data-driven systems
 export const recommendNextPitch = (
   pitches: Pitch[], 
@@ -97,7 +88,7 @@ export const recommendNextPitch = (
       batterHandedness,
       pitcherHandedness,
       previousPitches: pitches
-    }, historicalPitchData);
+    });
 
   // 3. MERGE RECOMMENDATIONS
   // Combine rule-based and data-driven scores

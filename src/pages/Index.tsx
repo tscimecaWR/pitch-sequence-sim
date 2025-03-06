@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import PitchInput from '@/components/PitchInput';
 import PitchHistory from '@/components/PitchHistory';
 import PitchRecommendation from '@/components/PitchRecommendation';
 import CountTracker from '@/components/CountTracker';
-import DataUploader from '@/components/DataUploader';
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '@/types/pitch';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -123,7 +121,7 @@ const Index = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          <div className="space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <div className="space-y-6 animate-slide-up w-full" style={{ animationDelay: '100ms' }}>
             <div className="w-full">
               <PitchInput 
                 onAddPitch={handleAddPitch} 
@@ -136,10 +134,6 @@ const Index = () => {
                 pitcherHandedness={pitcherHandedness}
                 setPitcherHandedness={setPitcherHandedness}
               />
-            </div>
-            
-            <div className="w-full">
-              <DataUploader />
             </div>
           </div>
           
