@@ -105,7 +105,7 @@ export const getDataDrivenRecommendation = (
   
   // Calculate scores based on success rates
   Object.entries(typeCounts).forEach(([type, data]) => {
-    if (data.total >= 5) {  // Ensure enough data points
+    if (data.total >= 3) {  // Changed from 5 to 3 - require fewer data points
       const successRate = data.success / data.total;
       typeScores[type as PitchType] = Math.round(successRate * 10);
       
@@ -117,7 +117,7 @@ export const getDataDrivenRecommendation = (
   });
   
   Object.entries(locationCounts).forEach(([location, data]) => {
-    if (data.total >= 5) {  // Ensure enough data points
+    if (data.total >= 3) {  // Changed from 5 to 3 - require fewer data points
       const successRate = data.success / data.total;
       locationScores[location as PitchLocation] = Math.round(successRate * 10);
     }
@@ -127,7 +127,7 @@ export const getDataDrivenRecommendation = (
   if (insights.length === 0 && relevantData.length > 0) {
     // Find best pitch type
     const bestType = Object.entries(typeCounts)
-      .filter(([_, data]) => data.total >= 5)
+      .filter(([_, data]) => data.total >= 3) // Changed from 5 to 3
       .sort(([_, dataA], [__, dataB]) => {
         const rateA = dataA.success / dataA.total;
         const rateB = dataB.success / dataB.total;

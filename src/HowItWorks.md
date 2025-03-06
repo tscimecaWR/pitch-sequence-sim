@@ -84,4 +84,10 @@ To maximize the effectiveness of the pitch recommendation system:
 3. Use the insights section to understand the reasoning behind recommendations
 4. Remember that the system is a decision support tool - your knowledge of the specific game situation is always valuable
 
+### Data Requirements
+The system only needs a minimum of 3 data points for a specific situation to begin generating data-driven recommendations. This means:
+- Even with a small dataset, you'll start seeing data-influenced recommendations quickly
+- More data still leads to more reliable insights, but the barrier to entry is low
+- The system will clearly indicate when it's using historical data in its decision-making process
+
 By combining your baseball expertise with our data-enhanced recommendation system, you'll have a powerful tool for making optimal pitching decisions in any situation.
