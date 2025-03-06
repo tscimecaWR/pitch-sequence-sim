@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { toast } from 'sonner';
 import { HistoricalPitchData } from '@/utils/dataBasedRecommendation';
 import { setHistoricalPitchData } from '@/utils/pitchRecommendation';
 import { PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '@/types/pitch';
+import { convertCoordinatesToLocation } from '@/utils/coordinateConversion';
 
 const DataUploader = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +57,6 @@ const DataUploader = () => {
     'In Play - HR': 'Unsuccessful'
   };
 
-  // New map for PitchCall values
   const pitchCallMap: Record<string, 'Successful' | 'Unsuccessful'> = {
     'StrikeCalled': 'Successful',
     'StrikeSwinging': 'Successful',
@@ -120,7 +119,7 @@ const DataUploader = () => {
 
     const header = lines[0].split(',').map(h => h.trim());
     
-    const requiredBaseColumns = ['Date', 'Location'];
+    const requiredBaseColumns = ['Date'];
     
     const hasCountColumn = header.includes('Count');
     const hasBallsColumn = header.includes('Balls');
@@ -159,6 +158,24 @@ const DataUploader = () => {
       throw new Error('Missing required column: Either "Result" or "PitchCall" must be present');
     }
     
+    const hasLocationColumn = header.includes('Location');
+    const hasPlateXColumn = header.includes('PlateX') || header.includes('plate_x') || header.includes('px');
+    const hasPlateZColumn = header.includes('PlateZ') || header.includes('plate_z') || header.includes('pz');
+    const hasCoordinateInfo = hasPlateXColumn && hasPlateZColumn;
+    
+    if (!hasLocationColumn && !hasCoordinateInfo) {
+      throw new Error('Missing required column: Either "Location" or both coordinate columns (PlateX/plate_x/px and PlateZ/plate_z/pz) must be present');
+    }
+    
+    let coordinateSystem: 'statcast' | 'trackman' | 'hawkeye' | 'normalized' = 'statcast';
+    if (hasCoordinateInfo) {
+      if (header.includes('TaggedPitchType') || header.includes('SpinRate')) {
+        coordinateSystem = 'trackman';
+      } else if (header.includes('Extension') || header.includes('RelHeight')) {
+        coordinateSystem = 'hawkeye';
+      }
+    }
+    
     const missingColumns = requiredBaseColumns.filter(col => !header.includes(col));
     
     if (missingColumns.length > 0) {
@@ -169,6 +186,12 @@ const DataUploader = () => {
     header.forEach((column, index) => {
       columnIndices[column] = index;
     });
+
+    const plateXColumn = header.includes('PlateX') ? 'PlateX' : 
+                      header.includes('plate_x') ? 'plate_x' : 'px';
+    
+    const plateZColumn = header.includes('PlateZ') ? 'PlateZ' : 
+                      header.includes('plate_z') ? 'plate_z' : 'pz';
 
     const data: HistoricalPitchData[] = [];
 
@@ -220,8 +243,24 @@ const DataUploader = () => {
       
       const pitchType = pitchTypeMap[rawPitchType] || 'Fastball';
       
-      const rawLocation = values[columnIndices['Location']];
-      const location = locationMap[rawLocation] || 'Middle Middle';
+      let location: PitchLocation = 'Middle Middle';
+      
+      if (hasLocationColumn) {
+        const rawLocation = values[columnIndices['Location']];
+        location = locationMap[rawLocation] || 'Middle Middle';
+      } else if (hasCoordinateInfo) {
+        const plateX = parseFloat(values[columnIndices[plateXColumn]]);
+        const plateZ = parseFloat(values[columnIndices[plateZColumn]]);
+        
+        if (!isNaN(plateX) && !isNaN(plateZ)) {
+          location = convertCoordinatesToLocation(
+            plateX, 
+            plateZ, 
+            batterHandedness, 
+            coordinateSystem
+          );
+        }
+      }
       
       let result: 'Successful' | 'Unsuccessful' = 'Unsuccessful';
       
@@ -249,6 +288,14 @@ const DataUploader = () => {
           verticalBreak: columnIndices['Vertical Break'] !== undefined ? parseFloat(values[columnIndices['Vertical Break']]) : undefined,
         }
       };
+      
+      if (hasCoordinateInfo) {
+        pitchRecord.metadata = {
+          ...pitchRecord.metadata,
+          plateX: parseFloat(values[columnIndices[plateXColumn]]),
+          plateZ: parseFloat(values[columnIndices[plateZColumn]])
+        };
+      }
       
       data.push(pitchRecord);
     }
