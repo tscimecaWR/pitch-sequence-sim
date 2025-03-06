@@ -110,9 +110,19 @@ const DataUploader = () => {
 
     const header = lines[0].split(',').map(h => h.trim());
     
-    // Validate required columns for new schema
-    const requiredColumns = ['Date', 'Pitch Type', 'Location', 'Count', 'Batter Stands', 'Pitcher Throws', 'Result'];
-    const missingColumns = requiredColumns.filter(col => !header.includes(col));
+    // Validate required columns, but now accepting TaggedPitchType as an alternative to Pitch Type
+    const requiredBaseColumns = ['Date', 'Location', 'Count', 'Batter Stands', 'Pitcher Throws', 'Result'];
+    
+    // Check if either Pitch Type or TaggedPitchType is present
+    const hasPitchTypeColumn = header.includes('Pitch Type');
+    const hasTaggedPitchTypeColumn = header.includes('TaggedPitchType');
+    
+    if (!hasPitchTypeColumn && !hasTaggedPitchTypeColumn) {
+      throw new Error('Missing required column: Either "Pitch Type" or "TaggedPitchType" must be present');
+    }
+    
+    // Check other required columns
+    const missingColumns = requiredBaseColumns.filter(col => !header.includes(col));
     
     if (missingColumns.length > 0) {
       throw new Error(`Missing required columns: ${missingColumns.join(', ')}`);
@@ -141,8 +151,15 @@ const DataUploader = () => {
       const batterHandedness = values[columnIndices['Batter Stands']] === 'R' ? 'Right' : 'Left';
       const pitcherHandedness = values[columnIndices['Pitcher Throws']] === 'R' ? 'Right' : 'Left';
       
-      // Map pitch type from full name to internal type
-      const rawPitchType = values[columnIndices['Pitch Type']];
+      // Map pitch type from full name to internal type, now checking both possible column names
+      let rawPitchType = '';
+      
+      if (hasPitchTypeColumn) {
+        rawPitchType = values[columnIndices['Pitch Type']];
+      } else if (hasTaggedPitchTypeColumn) {
+        rawPitchType = values[columnIndices['TaggedPitchType']];
+      }
+      
       const pitchType = pitchTypeMap[rawPitchType] || 'Fastball';
       
       // Map location to internal location
