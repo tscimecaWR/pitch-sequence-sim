@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -191,7 +192,8 @@ const DataUploader = () => {
                       header.includes('plate_x') ? 'plate_x' : 'px';
     
     const plateZColumn = header.includes('PlateZ') ? 'PlateZ' : 
-                      header.includes('plate_z') ? 'plate_z' : 'pz';
+                      header.includes('plate_z') ? 'plate_z' : 
+                      header.includes('PlateLocHeight') ? 'PlateLocHeight' : 'pz';
 
     const data: HistoricalPitchData[] = [];
 
