@@ -1,6 +1,6 @@
 
 import { HistoricalPitchData, CurrentPitchSituation, DataDrivenRecommendationResult } from '../types/historicalData';
-import { getDataDrivenRecommendation, debugState } from './historicalDataAnalysis';
+import { getDataDrivenRecommendation } from './historicalDataAnalysis';
 import { mergeRecommendationScores } from './recommendationMerger';
 import { importHistoricalData } from './historicalDataImport';
 
@@ -8,8 +8,7 @@ import { importHistoricalData } from './historicalDataImport';
 export { 
   getDataDrivenRecommendation,
   mergeRecommendationScores,
-  importHistoricalData,
-  debugState
+  importHistoricalData
 };
 
 // Re-export types 
