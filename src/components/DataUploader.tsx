@@ -111,7 +111,7 @@ const DataUploader = () => {
     const header = lines[0].split(',').map(h => h.trim());
     
     // Validate required columns, accepting alternative column names
-    const requiredBaseColumns = ['Date', 'Location', 'Count', 'Pitcher Throws', 'Result'];
+    const requiredBaseColumns = ['Date', 'Location', 'Count', 'Result'];
     
     // Check if either Pitch Type or TaggedPitchType is present
     const hasPitchTypeColumn = header.includes('Pitch Type');
@@ -127,6 +127,14 @@ const DataUploader = () => {
     
     if (!hasBatterStandsColumn && !hasBatterSideColumn) {
       throw new Error('Missing required column: Either "Batter Stands" or "BatterSide" must be present');
+    }
+    
+    // Check if either Pitcher Throws or PitcherThrows is present
+    const hasPitcherThrowsColumn = header.includes('Pitcher Throws');
+    const hasPitcherThrowsAltColumn = header.includes('PitcherThrows');
+    
+    if (!hasPitcherThrowsColumn && !hasPitcherThrowsAltColumn) {
+      throw new Error('Missing required column: Either "Pitcher Throws" or "PitcherThrows" must be present');
     }
     
     // Check other required columns
@@ -155,7 +163,7 @@ const DataUploader = () => {
       const countStr = values[columnIndices['Count']];
       const [balls, strikes] = countStr.split('-').map(Number);
       
-      // Get pitcher and batter handedness, now checking both possible column names for batter
+      // Get batter handedness, checking both possible column names
       let batterStands = '';
       if (hasBatterStandsColumn) {
         batterStands = values[columnIndices['Batter Stands']];
@@ -163,10 +171,18 @@ const DataUploader = () => {
         batterStands = values[columnIndices['BatterSide']];
       }
       
-      const batterHandedness = batterStands === 'R' ? 'Right' : 'Left';
-      const pitcherHandedness = values[columnIndices['Pitcher Throws']] === 'R' ? 'Right' : 'Left';
+      // Get pitcher handedness, checking both possible column names
+      let pitcherThrows = '';
+      if (hasPitcherThrowsColumn) {
+        pitcherThrows = values[columnIndices['Pitcher Throws']];
+      } else if (hasPitcherThrowsAltColumn) {
+        pitcherThrows = values[columnIndices['PitcherThrows']];
+      }
       
-      // Map pitch type from full name to internal type, now checking both possible column names
+      const batterHandedness = batterStands === 'R' ? 'Right' : 'Left';
+      const pitcherHandedness = pitcherThrows === 'R' ? 'Right' : 'Left';
+      
+      // Map pitch type from full name to internal type, checking both possible column names
       let rawPitchType = '';
       
       if (hasPitchTypeColumn) {
