@@ -1,4 +1,3 @@
-
 # Technical Implementation of the Pitch Recommendation System
 
 ## System Architecture Overview
@@ -17,6 +16,7 @@ recommendNextPitch() → { type, location, insights }
      │
      ├── Data-driven System
      │    └── getDataDrivenRecommendation()
+     │         └── calculateSimilarityScore()
      │
      └── Recommendation Merger
           └── mergeRecommendationScores()
@@ -89,24 +89,56 @@ recommendNextPitch() → { type, location, insights }
 ### 2. Data-Driven System (`historicalDataAnalysis.ts`)
 
 - Processes historical pitch data to find patterns in similar situations
-- Uses filtering to identify relevant historical scenarios:
+- Uses fuzzy matching to identify relevant historical scenarios:
   ```typescript
-  const relevantData = historicalData.filter(pitch => {
-    const countMatch = pitch.count.balls === count.balls && 
-                      pitch.count.strikes === count.strikes;
-    const handednessMatch = pitch.batterHandedness === batterHandedness && 
-                           pitch.pitcherHandedness === pitcherHandedness;
-    return countMatch && handednessMatch;
-  });
+  // Calculate similarity between current situation and historical data
+  const calculateSimilarityScore = (
+    current: CurrentPitchSituation,
+    historical: HistoricalPitchData
+  ): number => {
+    let score = 0;
+    const maxScore = 10;
+    
+    // Count similarity scoring
+    if (current.count.balls === historical.count.balls && 
+        current.count.strikes === historical.count.strikes) {
+      score += 4; // Perfect count match
+    } else if (/* other similarity conditions */) {
+      // Add partial similarity scores
+    }
+    
+    // Handedness similarity scoring
+    if (current.batterHandedness === historical.batterHandedness && 
+        current.pitcherHandedness === historical.pitcherHandedness) {
+      score += 6; // Perfect handedness match
+    } else if (/* partial handedness matches */) {
+      score += 3;
+    }
+    
+    // Normalize to 0-1
+    return score / maxScore;
+  };
   ```
 
-- Calculates success rates for each pitch type and location:
+- Applies weighted scoring based on similarity:
   ```typescript
-  Object.entries(typeCounts).forEach(([type, data]) => {
-    if (data.total >= 3) {
-      const successRate = data.success / data.total;
-      typeScores[type as PitchType] = Math.round(successRate * 10);
-    }
+  // Filter and sort by similarity
+  const relevantData = historicalData
+    .map(pitch => ({
+      pitch,
+      similarityScore: calculateSimilarityScore(currentSituation, pitch)
+    }))
+    .filter(item => item.similarityScore >= SIMILARITY_THRESHOLD)
+    .sort((a, b) => b.similarityScore - a.similarityScore);
+
+  // Weight success by similarity when calculating scores
+  topRelevantData.forEach(({ pitch, similarityScore }) => {
+    const isSuccess = pitch.result === 'Successful';
+    const weight = similarityScore;
+    
+    typeCounts[pitch.type].total += 1;
+    typeCounts[pitch.type].weightedSuccess += isSuccess ? weight : 0;
+    // Similar for locations
   });
   ```
 
@@ -278,10 +310,36 @@ export function applyPitcherFatigueScoring(
 
 The system is designed to be lightweight and suitable for real-time use:
 
-1. **Time Complexity**: O(n) where n is the number of previous pitches
-2. **Space Complexity**: O(1) as we use fixed-size scoring matrices
-3. **Default Randomness**: A 0.15 randomness factor (15%) prevents deterministic loops
-4. **Computation Delay**: A 500ms artificial delay improves UX with a "calculating" animation
+1. **Time Complexity**: 
+   - Rule-based system: O(n) where n is the number of previous pitches
+   - Fuzzy matching: O(m) where m is the number of historical data points
+   - Overall worst case: O(n + m)
+
+2. **Space Complexity**: O(1) for scoring matrices, O(k) for top k similar pitches
+
+3. **Fuzzy Matching Optimization**:
+   - Uses a similarity threshold (default: 0.4) to filter irrelevant data
+   - Limits processed results to top 100 most similar situations
+   - Weights recommendations by similarity score
+
+4. **Default Randomness**: A 0.15 randomness factor (15%) prevents deterministic loops
+
+## Fuzzy Matching Algorithm
+
+The fuzzy matching algorithm evaluates similarity between the current situation and historical data based on:
+
+1. **Count Similarity** (0-4 points):
+   - Exact count match: 4 points
+   - Same total (e.g., 2-1 vs 1-2): 2 points  
+   - Similar pressure (two strikes or three balls): 3 points
+   - Count within ±1 ball/strike: 1 point
+
+2. **Handedness Similarity** (0-6 points):
+   - Both batter and pitcher handedness match: 6 points
+   - Only batter handedness matches: 3 points
+   - Only pitcher handedness matches: 3 points
+
+The final similarity score is normalized to a 0-1 range, where 1.0 represents a perfect match. Only situations with similarity scores above the configurable threshold (default: 0.4) are considered for recommendation.
 
 ## Type System
 
