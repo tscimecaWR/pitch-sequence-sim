@@ -10,8 +10,9 @@ import { setHistoricalPitchData } from '../utils/pitchRecommendation';
 import { importHistoricalData, HistoricalPitchData, debugState } from '../utils/dataBasedRecommendation';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { BookOpenCheck, Info } from 'lucide-react';
+import { BookOpenCheck, Info, RefreshCw } from 'lucide-react';
 import DebugHistoricalData from '../components/DebugHistoricalData';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [pitches, setPitches] = useState<Pitch[]>([]);
