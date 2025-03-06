@@ -1,3 +1,4 @@
+
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
 import { 
   applyCountBasedScoring, 
@@ -25,7 +26,8 @@ export const recommendNextPitch = (
   pitches: Pitch[], 
   options: { 
     dataWeight?: number;
-    includeInsights?: boolean; 
+    includeInsights?: boolean;
+    randomness?: number;
   } = {}
 ): { 
   type: PitchType; 
@@ -33,7 +35,11 @@ export const recommendNextPitch = (
   insights?: string[];
   pitcherNames?: string[];
 } => {
-  const { dataWeight = 0.8, includeInsights = true } = options;
+  const { 
+    dataWeight = 0.8, 
+    includeInsights = true,
+    randomness = 0.15 
+  } = options;
   
   if (pitches.length === 0) {
     return {
@@ -125,12 +131,17 @@ export const recommendNextPitch = (
       previousPitches: pitches
     }, historicalPitchData);
 
+  // Extract recent pitch types and locations for variety promotion
+  const recentPitchTypes = pitches.slice(-3).map(p => p.type);
+  const recentLocations = pitches.slice(-3).map(p => p.location);
+
   // 3. MERGE RECOMMENDATIONS
-  // Combine rule-based and data-driven scores
+  // Combine rule-based and data-driven scores with randomness to break loops
   const mergedScores = mergeRecommendationScores(
     ruleBasedScores,
     { typeScores: dataTypeScores, locationScores: dataLocationScores },
-    dataWeight
+    dataWeight,
+    { randomness, recentPitchTypes, recentLocations }
   );
   
   // Use the merged scores for final recommendation
@@ -155,15 +166,18 @@ export const recommendNextPitch = (
       return {
         type: bestPitchType,
         location: bestAlternativeLocation,
-        insights: includeInsights ? [...(insights || []), ...avoidanceInsights] : undefined,
+        insights: includeInsights ? [...(insights || []), ...avoidanceInsights, 'Added randomness to avoid repetitive patterns'] : undefined,
         pitcherNames
       };
     }
   }
 
+  // Add randomness insight
+  const randomnessInsight = ['Added randomness to avoid repetitive patterns'];
+
   // Add any avoidance insights to the final insights
   const finalInsights = includeInsights ? 
-    [...(insights || []), ...avoidanceInsights] : 
+    [...(insights || []), ...avoidanceInsights, ...randomnessInsight] : 
     undefined;
 
   return {

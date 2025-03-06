@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PitchInput from '@/components/PitchInput';
 import PitchHistory from '@/components/PitchHistory';
