@@ -72,8 +72,9 @@ The system might tell you things like:
 ## Recommendation Balancing
 
 The final recommendation balances traditional baseball wisdom with data-driven insights:
+- By default, the system gives stronger weight (80%) to data-driven insights when historical data is available
 - When little historical data exists, the system relies more heavily on rule-based recommendations
-- As more data becomes available, data-driven insights carry more weight
+- As more data becomes available, data-driven insights carry even more weight
 - You can adjust how much the system prioritizes historical data vs. traditional strategy
 
 ## Getting the Most from the System

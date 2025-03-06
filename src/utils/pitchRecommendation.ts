@@ -1,4 +1,3 @@
-
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
 import { 
   applyCountBasedScoring, 
@@ -34,7 +33,7 @@ export const recommendNextPitch = (
   insights?: string[];
   pitcherNames?: string[];
 } => {
-  const { dataWeight = 0.5, includeInsights = true } = options;
+  const { dataWeight = 0.8, includeInsights = true } = options;
   
   if (pitches.length === 0) {
     return {

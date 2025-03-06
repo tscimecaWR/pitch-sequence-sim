@@ -6,7 +6,7 @@ import { RecommendationScores } from '../types/historicalData';
 export const mergeRecommendationScores = (
   ruleBasedScores: RecommendationScores,
   dataBasedScores: RecommendationScores,
-  dataWeight: number = 0.5  // Weight given to data-driven recommendations (0-1)
+  dataWeight: number = 0.8  // Weight given to data-driven recommendations (0-1) - updated from 0.5 to 0.8
 ): RecommendationScores => {
   const ruleWeight = 1 - dataWeight;
   
