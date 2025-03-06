@@ -1,4 +1,3 @@
-
 import { HistoricalPitchData } from '@/utils/dataBasedRecommendation';
 import { PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '@/types/pitch';
 import { convertCoordinatesToLocation } from '@/utils/coordinateConversion';
@@ -74,6 +73,7 @@ export function validateCSVHeader(header: string[]): {
   hasBatterSideColumn: boolean;
   hasPitcherThrowsColumn: boolean;
   hasPitcherThrowsAltColumn: boolean;
+  hasPitcherColumn: boolean;
   hasResultColumn: boolean;
   hasPitchCallColumn: boolean;
   hasLocationColumn: boolean;
@@ -129,6 +129,7 @@ export function validateCSVHeader(header: string[]): {
   // Pitcher columns
   const hasPitcherThrowsColumn = header.includes('Pitcher Throws');
   const hasPitcherThrowsAltColumn = header.includes('PitcherThrows');
+  const hasPitcherColumn = header.includes('Pitcher');
   
   if (!hasPitcherThrowsColumn && !hasPitcherThrowsAltColumn) {
     throw new Error('Missing required column: Either "Pitcher Throws" or "PitcherThrows" must be present');
@@ -197,6 +198,7 @@ export function validateCSVHeader(header: string[]): {
     hasBatterSideColumn,
     hasPitcherThrowsColumn,
     hasPitcherThrowsAltColumn,
+    hasPitcherColumn,
     hasResultColumn,
     hasPitchCallColumn,
     hasLocationColumn,
@@ -230,6 +232,7 @@ export function parseCSV(csvText: string): HistoricalPitchData[] {
     hasBatterSideColumn,
     hasPitcherThrowsColumn,
     hasPitcherThrowsAltColumn,
+    hasPitcherColumn,
     hasResultColumn,
     hasPitchCallColumn,
     hasLocationColumn,
@@ -326,7 +329,7 @@ export function parseCSV(csvText: string): HistoricalPitchData[] {
       result,
       metadata: {
         date: values[columnIndices['Date']],
-        pitcher: columnIndices['Pitcher'] !== undefined ? values[columnIndices['Pitcher']] : undefined,
+        pitcher: hasPitcherColumn ? values[columnIndices['Pitcher']] : undefined,
         velocity: columnIndices['Pitch Velocity'] !== undefined ? parseFloat(values[columnIndices['Pitch Velocity']]) : undefined,
         spinRate: columnIndices['Spin Rate'] !== undefined ? parseFloat(values[columnIndices['Spin Rate']]) : undefined,
         horizontalBreak: columnIndices['Horizontal Break'] !== undefined ? parseFloat(values[columnIndices['Horizontal Break']]) : undefined,

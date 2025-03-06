@@ -47,6 +47,7 @@ export const getDataDrivenRecommendation = (
   typeScores: Record<PitchType, number>;
   locationScores: Record<PitchLocation, number>;
   insights: string[];
+  pitcherNames?: string[]; // Add pitcher names to the return type
 } => {
   // Initialize scores
   const typeScores: Record<PitchType, number> = {
@@ -64,6 +65,7 @@ export const getDataDrivenRecommendation = (
   };
   
   const insights: string[] = [];
+  const pitcherNames: Set<string> = new Set();
 
   // Extract the current situation
   const { count, batterHandedness, pitcherHandedness } = currentSituation;
@@ -85,6 +87,13 @@ export const getDataDrivenRecommendation = (
     insights.push("Not enough historical data for this exact situation");
     return { typeScores, locationScores, insights };
   }
+
+  // Collect pitcher names from the data
+  relevantData.forEach(pitch => {
+    if (pitch.metadata?.pitcher) {
+      pitcherNames.add(pitch.metadata.pitcher);
+    }
+  });
 
   // Calculate success rates for each pitch type
   const typeCounts: Record<PitchType, { success: number, total: number }> = {
@@ -152,6 +161,12 @@ export const getDataDrivenRecommendation = (
       const successRate = data.success / data.total;
       insights.push(`${type} is historically the most effective pitch in this situation (${Math.round(successRate * 100)}% success)`);
     }
+  }
+
+  // Add pitcher names to insights if available
+  if (pitcherNames.size > 0) {
+    const pitcherNamesArray = Array.from(pitcherNames);
+    return { typeScores, locationScores, insights, pitcherNames: pitcherNamesArray };
   }
   
   return { typeScores, locationScores, insights };

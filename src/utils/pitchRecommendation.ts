@@ -32,6 +32,7 @@ export const recommendNextPitch = (
   type: PitchType; 
   location: PitchLocation; 
   insights?: string[];
+  pitcherNames?: string[];
 } => {
   const { dataWeight = 0.5, includeInsights = true } = options;
   
@@ -91,7 +92,7 @@ export const recommendNextPitch = (
 
   // 2. DATA-DRIVEN SYSTEM
   // Pull insights from historical data if available
-  const { typeScores: dataTypeScores, locationScores: dataLocationScores, insights } = 
+  const { typeScores: dataTypeScores, locationScores: dataLocationScores, insights, pitcherNames } = 
     getDataDrivenRecommendation({
       count: currentCount,
       batterHandedness,
@@ -114,6 +115,7 @@ export const recommendNextPitch = (
   return {
     type: bestPitchType,
     location: bestLocation,
-    insights: includeInsights ? insights : undefined
+    insights: includeInsights ? insights : undefined,
+    pitcherNames: pitcherNames
   };
 };
