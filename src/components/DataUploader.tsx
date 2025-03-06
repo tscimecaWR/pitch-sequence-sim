@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +12,6 @@ const DataUploader = () => {
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [recordCount, setRecordCount] = useState(0);
 
-  // Map CSV column names to our internal types
   const pitchTypeMap: Record<string, PitchType> = {
     '4-Seam Fastball': 'Fastball',
     'Curveball': 'Curveball',
@@ -22,7 +20,6 @@ const DataUploader = () => {
     'Cutter': 'Cutter',
     'Sinker': 'Sinker',
     'Splitter': 'Splitter',
-    // Additional mappings for the new schema
     'Fastball': 'Fastball',
     '2-Seam Fastball': 'Sinker'
   };
@@ -37,7 +34,6 @@ const DataUploader = () => {
     'Low & Inside': 'Low Inside',
     'Low & Middle': 'Low Middle',
     'Low & Outside': 'Low Outside',
-    // Ball zones
     'Way High & Inside': 'Way High Inside',
     'Way High': 'Way High',
     'Way High & Outside': 'Way High Outside',
@@ -110,10 +106,17 @@ const DataUploader = () => {
 
     const header = lines[0].split(',').map(h => h.trim());
     
-    // Validate required columns, accepting alternative column names
-    const requiredBaseColumns = ['Date', 'Location', 'Count', 'Result'];
+    const requiredBaseColumns = ['Date', 'Location', 'Result'];
     
-    // Check if either Pitch Type or TaggedPitchType is present
+    const hasCountColumn = header.includes('Count');
+    const hasBallsColumn = header.includes('Balls');
+    const hasStrikesColumn = header.includes('Strikes');
+    const hasCountInfo = hasCountColumn || (hasBallsColumn && hasStrikesColumn);
+    
+    if (!hasCountInfo) {
+      throw new Error('Missing required column: Either "Count" or both "Balls" and "Strikes" must be present');
+    }
+    
     const hasPitchTypeColumn = header.includes('Pitch Type');
     const hasTaggedPitchTypeColumn = header.includes('TaggedPitchType');
     
@@ -121,7 +124,6 @@ const DataUploader = () => {
       throw new Error('Missing required column: Either "Pitch Type" or "TaggedPitchType" must be present');
     }
     
-    // Check if either Batter Stands or BatterSide is present
     const hasBatterStandsColumn = header.includes('Batter Stands');
     const hasBatterSideColumn = header.includes('BatterSide');
     
@@ -129,7 +131,6 @@ const DataUploader = () => {
       throw new Error('Missing required column: Either "Batter Stands" or "BatterSide" must be present');
     }
     
-    // Check if either Pitcher Throws or PitcherThrows is present
     const hasPitcherThrowsColumn = header.includes('Pitcher Throws');
     const hasPitcherThrowsAltColumn = header.includes('PitcherThrows');
     
@@ -137,14 +138,12 @@ const DataUploader = () => {
       throw new Error('Missing required column: Either "Pitcher Throws" or "PitcherThrows" must be present');
     }
     
-    // Check other required columns
     const missingColumns = requiredBaseColumns.filter(col => !header.includes(col));
     
     if (missingColumns.length > 0) {
       throw new Error(`Missing required columns: ${missingColumns.join(', ')}`);
     }
 
-    // Map column indices
     const columnIndices: Record<string, number> = {};
     header.forEach((column, index) => {
       columnIndices[column] = index;
@@ -152,18 +151,27 @@ const DataUploader = () => {
 
     const data: HistoricalPitchData[] = [];
 
-    // Parse data rows (skip header)
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue; // Skip empty lines
       
       const values = line.split(',').map(v => v.trim());
       
-      // Parse count (format: "B-S" like "1-2")
-      const countStr = values[columnIndices['Count']];
-      const [balls, strikes] = countStr.split('-').map(Number);
+      let balls = 0;
+      let strikes = 0;
       
-      // Get batter handedness, checking both possible column names
+      if (hasCountColumn) {
+        const countStr = values[columnIndices['Count']];
+        const countParts = countStr.split('-').map(Number);
+        if (countParts.length === 2) {
+          balls = countParts[0];
+          strikes = countParts[1];
+        }
+      } else if (hasBallsColumn && hasStrikesColumn) {
+        balls = parseInt(values[columnIndices['Balls']], 10) || 0;
+        strikes = parseInt(values[columnIndices['Strikes']], 10) || 0;
+      }
+      
       let batterStands = '';
       if (hasBatterStandsColumn) {
         batterStands = values[columnIndices['Batter Stands']];
@@ -171,7 +179,6 @@ const DataUploader = () => {
         batterStands = values[columnIndices['BatterSide']];
       }
       
-      // Get pitcher handedness, checking both possible column names
       let pitcherThrows = '';
       if (hasPitcherThrowsColumn) {
         pitcherThrows = values[columnIndices['Pitcher Throws']];
@@ -182,7 +189,6 @@ const DataUploader = () => {
       const batterHandedness = batterStands === 'R' ? 'Right' : 'Left';
       const pitcherHandedness = pitcherThrows === 'R' ? 'Right' : 'Left';
       
-      // Map pitch type from full name to internal type, checking both possible column names
       let rawPitchType = '';
       
       if (hasPitchTypeColumn) {
@@ -193,15 +199,12 @@ const DataUploader = () => {
       
       const pitchType = pitchTypeMap[rawPitchType] || 'Fastball';
       
-      // Map location to internal location
       const rawLocation = values[columnIndices['Location']];
       const location = locationMap[rawLocation] || 'Middle Middle';
       
-      // Map outcome to success/failure
       const rawResult = values[columnIndices['Result']];
       const result = resultMap[rawResult] || 'Unsuccessful';
 
-      // Create pitch record
       const pitchRecord: HistoricalPitchData = {
         type: pitchType as PitchType,
         location: location as PitchLocation,
@@ -211,7 +214,6 @@ const DataUploader = () => {
         result,
         metadata: {
           date: values[columnIndices['Date']],
-          // Optional metadata fields based on availability
           pitcher: columnIndices['Pitcher'] !== undefined ? values[columnIndices['Pitcher']] : undefined,
           velocity: columnIndices['Pitch Velocity'] !== undefined ? parseFloat(values[columnIndices['Pitch Velocity']]) : undefined,
           spinRate: columnIndices['Spin Rate'] !== undefined ? parseFloat(values[columnIndices['Spin Rate']]) : undefined,
