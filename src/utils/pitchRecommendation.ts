@@ -21,6 +21,11 @@ export const setHistoricalPitchData = (data: HistoricalPitchData[]): void => {
   console.log(`Loaded ${data.length} historical pitch records`);
 };
 
+// Debug utility to get historical data count
+export const getHistoricalDataCount = (): number => {
+  return historicalPitchData.length;
+};
+
 // Enhanced recommendation logic using both rule-based and data-driven systems
 export const recommendNextPitch = (
   pitches: Pitch[], 
@@ -28,24 +33,35 @@ export const recommendNextPitch = (
     dataWeight?: number;
     includeInsights?: boolean;
     randomness?: number;
+    includeDebugInfo?: boolean;
   } = {}
 ): { 
   type: PitchType; 
   location: PitchLocation; 
   insights?: string[];
   pitcherNames?: string[];
+  debugInfo?: any;
 } => {
   const { 
     dataWeight = 0.8, 
     includeInsights = true,
-    randomness = 0.15 
+    randomness = 0.15,
+    includeDebugInfo = false
   } = options;
+  
+  const debugInfo: any = {
+    historicalDataCount: historicalPitchData.length,
+    timing: {}
+  };
+  
+  debugInfo.timing.start = performance.now();
   
   if (pitches.length === 0) {
     return {
       type: 'Fastball',
       location: 'Middle Middle',
-      insights: includeInsights ? ['First pitch recommendation (no prior data)'] : undefined
+      insights: includeInsights ? ['First pitch recommendation (no prior data)'] : undefined,
+      debugInfo: includeDebugInfo ? debugInfo : undefined
     };
   }
 
@@ -80,6 +96,8 @@ export const recommendNextPitch = (
   const pitcherHandedness = lastPitch.pitcherHandedness || 'Right';
 
   // 1. RULE-BASED SYSTEM
+  debugInfo.timing.ruleBasedStart = performance.now();
+  
   // 1.1 Full Count Analysis
   applyCountBasedScoring(pitchTypeScores, locationScores, currentCount);
   
@@ -115,27 +133,41 @@ export const recommendNextPitch = (
     }
   }
 
+  debugInfo.timing.ruleBasedEnd = performance.now();
+  debugInfo.ruleBasedDuration = debugInfo.timing.ruleBasedEnd - debugInfo.timing.ruleBasedStart;
+
   // Store rule-based scores
   const ruleBasedScores = {
     typeScores: { ...pitchTypeScores },
     locationScores: { ...locationScores }
   };
+  
+  debugInfo.ruleBasedScores = ruleBasedScores;
 
   // 2. DATA-DRIVEN SYSTEM
+  debugInfo.timing.dataBasedStart = performance.now();
+  
   // Pull insights from historical data if available
-  const { typeScores: dataTypeScores, locationScores: dataLocationScores, insights, pitcherNames } = 
-    getDataDrivenRecommendation({
-      count: currentCount,
-      batterHandedness,
-      pitcherHandedness,
-      previousPitches: pitches
-    }, historicalPitchData);
+  const dataBasedResult = getDataDrivenRecommendation({
+    count: currentCount,
+    batterHandedness,
+    pitcherHandedness,
+    previousPitches: pitches
+  }, historicalPitchData);
+  
+  const { typeScores: dataTypeScores, locationScores: dataLocationScores, insights, pitcherNames } = dataBasedResult;
+  
+  debugInfo.timing.dataBasedEnd = performance.now();
+  debugInfo.dataBasedDuration = debugInfo.timing.dataBasedEnd - debugInfo.timing.dataBasedStart;
+  debugInfo.dataBasedResult = dataBasedResult;
 
   // Extract recent pitch types and locations for variety promotion
   const recentPitchTypes = pitches.slice(-3).map(p => p.type);
   const recentLocations = pitches.slice(-3).map(p => p.location);
 
   // 3. MERGE RECOMMENDATIONS
+  debugInfo.timing.mergeStart = performance.now();
+  
   // Combine rule-based and data-driven scores with randomness to break loops
   const mergedScores = mergeRecommendationScores(
     ruleBasedScores,
@@ -143,6 +175,10 @@ export const recommendNextPitch = (
     dataWeight,
     { randomness, recentPitchTypes, recentLocations }
   );
+  
+  debugInfo.timing.mergeEnd = performance.now();
+  debugInfo.mergeDuration = debugInfo.timing.mergeEnd - debugInfo.timing.mergeStart;
+  debugInfo.mergedScores = mergedScores;
   
   // Use the merged scores for final recommendation
   const bestPitchType = findHighestScoringKey(mergedScores.typeScores);
@@ -162,12 +198,16 @@ export const recommendNextPitch = (
       // Add insight about the override
       avoidanceInsights.push(`Relocated ${bestPitchType} from ${bestLocation} to ${bestAlternativeLocation} (top half avoidance rule)`);
       
+      debugInfo.timing.end = performance.now();
+      debugInfo.totalDuration = debugInfo.timing.end - debugInfo.timing.start;
+      
       // Return with override
       return {
         type: bestPitchType,
         location: bestAlternativeLocation,
         insights: includeInsights ? [...(insights || []), ...avoidanceInsights, 'Added randomness to avoid repetitive patterns'] : undefined,
-        pitcherNames
+        pitcherNames,
+        debugInfo: includeDebugInfo ? debugInfo : undefined
       };
     }
   }
@@ -179,11 +219,15 @@ export const recommendNextPitch = (
   const finalInsights = includeInsights ? 
     [...(insights || []), ...avoidanceInsights, ...randomnessInsight] : 
     undefined;
+    
+  debugInfo.timing.end = performance.now();
+  debugInfo.totalDuration = debugInfo.timing.end - debugInfo.timing.start;
 
   return {
     type: bestPitchType,
     location: bestLocation,
     insights: finalInsights,
-    pitcherNames
+    pitcherNames,
+    debugInfo: includeDebugInfo ? debugInfo : undefined
   };
 };

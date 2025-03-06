@@ -6,24 +6,10 @@ import {
   DataDrivenRecommendationResult 
 } from '../types/historicalData';
 
-// Sample data - would be replaced with actual dataset
-const SAMPLE_DATA: HistoricalPitchData[] = [
-  // This is placeholder data - would be replaced with your actual dataset
-  {
-    type: 'Fastball',
-    location: 'High Inside',
-    count: { balls: 0, strikes: 0 },
-    batterHandedness: 'Right',
-    pitcherHandedness: 'Right',
-    result: 'Successful'
-  },
-  // More sample data would go here
-];
-
 // Central function to get data-driven pitch recommendations
 export const getDataDrivenRecommendation = (
   currentSituation: CurrentPitchSituation,
-  historicalData: HistoricalPitchData[] = SAMPLE_DATA
+  historicalData: HistoricalPitchData[] = []
 ): DataDrivenRecommendationResult => {
   // Initialize scores
   const typeScores: Record<PitchType, number> = {
@@ -43,6 +29,15 @@ export const getDataDrivenRecommendation = (
   const insights: string[] = [];
   const pitcherNames: string[] = [];
 
+  // Log data received
+  console.log(`Processing data-driven recommendation with ${historicalData.length} historical records`);
+  
+  // Immediately return if no historical data
+  if (historicalData.length === 0) {
+    insights.push("No historical data available");
+    return { typeScores, locationScores, insights, pitcherNames };
+  }
+
   // Extract the current situation
   const { count, batterHandedness, pitcherHandedness } = currentSituation;
   
@@ -59,8 +54,10 @@ export const getDataDrivenRecommendation = (
     return countMatch && handednessMatch;
   });
   
+  console.log(`Found ${relevantData.length} relevant pitches for this situation`);
+  
   if (relevantData.length === 0) {
-    insights.push("Not enough historical data for this exact situation");
+    insights.push("No historical data for this specific situation");
     return { typeScores, locationScores, insights, pitcherNames };
   }
 
@@ -105,21 +102,26 @@ export const getDataDrivenRecommendation = (
   
   // Calculate scores based on success rates
   Object.entries(typeCounts).forEach(([type, data]) => {
-    if (data.total >= 3) {  // Changed from 5 to 3 - require fewer data points
+    if (data.total >= 3) {  // Require at least 3 data points
       const successRate = data.success / data.total;
       typeScores[type as PitchType] = Math.round(successRate * 10);
       
       // Add insight for top pitches
-      if (successRate > 0.7) {
-        insights.push(`${type} has a ${Math.round(successRate * 100)}% success rate in similar situations`);
+      if (successRate > 0.6) {  // Lowered threshold to 60% to show more insights
+        insights.push(`${type} has a ${Math.round(successRate * 100)}% success rate in similar situations (${data.success}/${data.total})`);
       }
     }
   });
   
   Object.entries(locationCounts).forEach(([location, data]) => {
-    if (data.total >= 3) {  // Changed from 5 to 3 - require fewer data points
+    if (data.total >= 3) {  // Require at least 3 data points
       const successRate = data.success / data.total;
       locationScores[location as PitchLocation] = Math.round(successRate * 10);
+      
+      // Add insights for locations too
+      if (successRate > 0.6) {
+        insights.push(`${location} location has a ${Math.round(successRate * 100)}% success rate (${data.success}/${data.total})`);
+      }
     }
   });
   
@@ -127,7 +129,7 @@ export const getDataDrivenRecommendation = (
   if (insights.length === 0 && relevantData.length > 0) {
     // Find best pitch type
     const bestType = Object.entries(typeCounts)
-      .filter(([_, data]) => data.total >= 3) // Changed from 5 to 3
+      .filter(([_, data]) => data.total >= 3)
       .sort(([_, dataA], [__, dataB]) => {
         const rateA = dataA.success / dataA.total;
         const rateB = dataB.success / dataB.total;
@@ -137,9 +139,12 @@ export const getDataDrivenRecommendation = (
     if (bestType) {
       const [type, data] = bestType;
       const successRate = data.success / data.total;
-      insights.push(`${type} is historically the most effective pitch in this situation (${Math.round(successRate * 100)}% success)`);
+      insights.push(`${type} is historically the most effective pitch in this situation (${Math.round(successRate * 100)}% success - ${data.success}/${data.total})`);
     }
   }
+  
+  // Add data sufficiency insight
+  insights.push(`Analysis based on ${relevantData.length} similar historical pitches`);
   
   // Add insights about successful pitchers if available
   if (pitcherNames.length > 0) {

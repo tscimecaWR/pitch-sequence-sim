@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
@@ -5,7 +6,7 @@ import { recommendNextPitch } from '../utils/pitchRecommendation';
 import PitchZone from './PitchZone';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Info, LineChart, User, Eye, EyeOff } from 'lucide-react';
+import { Copy, Info, LineChart, User, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface PitchRecommendationProps {
@@ -26,9 +27,11 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
     location: PitchLocation;
     insights?: string[];
     pitcherNames?: string[];
+    debugInfo?: any;
   } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
 
   const getCurrentCount = () => {
     if (pitches.length === 0) return { balls: 0, strikes: 0 };
@@ -68,7 +71,14 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
           };
         }
         
-        setRecommendation(recommendNextPitch(updatedPitches, { includeInsights: true }));
+        // Add debugging info to recommendation
+        const result = recommendNextPitch(updatedPitches, { 
+          includeInsights: true,
+          includeDebugInfo: true
+        });
+        
+        console.log('Recommendation result:', result);
+        setRecommendation(result);
         setIsCalculating(false);
       }, 500);
       
@@ -149,7 +159,7 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                 </span>
               </div>
               
-              {recommendation.pitcherNames && recommendation.pitcherNames.length > 0 && (
+              {recommendation.pitcherNames && recommendation.pitcherNames.length > 0 ? (
                 <div className="w-full mt-2 p-2 bg-blue-500/10 rounded-lg">
                   <div className="text-sm font-medium mb-1 flex items-center gap-1 text-blue-600 dark:text-blue-400">
                     <User size={14} />
@@ -168,6 +178,13 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                         +{recommendation.pitcherNames.length - 5} more
                       </Badge>
                     )}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full mt-2 p-2 bg-amber-500/10 rounded-lg">
+                  <div className="text-sm flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                    <AlertTriangle size={14} />
+                    <span>No matching historical data found for this situation</span>
                   </div>
                 </div>
               )}
@@ -197,6 +214,29 @@ const PitchRecommendation: React.FC<PitchRecommendationProps> = ({
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {process.env.NODE_ENV === 'development' && recommendation.debugInfo && (
+                <div className="w-full mt-2">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-orange-500/10 transition-colors"
+                    onClick={() => setShowDebug(!showDebug)}
+                  >
+                    <div className="text-sm font-medium flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                      <AlertTriangle size={14} />
+                      Debug Information
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      {showDebug ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </Button>
+                  </div>
+                  
+                  {showDebug && (
+                    <div className="p-3 bg-orange-500/5 rounded-lg mt-1 text-xs font-mono overflow-auto max-h-[200px]">
+                      <pre>{JSON.stringify(recommendation.debugInfo, null, 2)}</pre>
                     </div>
                   )}
                 </div>
