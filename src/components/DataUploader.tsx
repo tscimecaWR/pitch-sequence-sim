@@ -15,44 +15,49 @@ const DataUploader = () => {
 
   // Map CSV column names to our internal types
   const pitchTypeMap: Record<string, PitchType> = {
-    'FF': 'Fastball',
-    'CU': 'Curveball',
-    'SL': 'Slider',
-    'CH': 'Changeup',
-    'FC': 'Cutter',
-    'SI': 'Sinker',
-    'FS': 'Splitter'
+    '4-Seam Fastball': 'Fastball',
+    'Curveball': 'Curveball',
+    'Slider': 'Slider',
+    'Changeup': 'Changeup',
+    'Cutter': 'Cutter',
+    'Sinker': 'Sinker',
+    'Splitter': 'Splitter',
+    // Additional mappings for the new schema
+    'Fastball': 'Fastball',
+    '2-Seam Fastball': 'Sinker'
   };
 
   const locationMap: Record<string, PitchLocation> = {
-    'HI': 'High Inside',
-    'HM': 'High Middle',
-    'HO': 'High Outside',
-    'MI': 'Middle Inside',
-    'MM': 'Middle Middle',
-    'MO': 'Middle Outside',
-    'LI': 'Low Inside',
-    'LM': 'Low Middle',
-    'LO': 'Low Outside',
-    'WHI': 'Way High Inside',
-    'WH': 'Way High',
-    'WHO': 'Way High Outside',
-    'WI': 'Way Inside',
-    'WO': 'Way Outside',
-    'WLI': 'Way Low Inside',
-    'WL': 'Way Low',
-    'WLO': 'Way Low Outside'
+    'High & Inside': 'High Inside',
+    'High & Middle': 'High Middle',
+    'High & Outside': 'High Outside',
+    'Middle & Inside': 'Middle Inside',
+    'Middle': 'Middle Middle',
+    'Middle & Outside': 'Middle Outside',
+    'Low & Inside': 'Low Inside',
+    'Low & Middle': 'Low Middle',
+    'Low & Outside': 'Low Outside',
+    // Ball zones
+    'Way High & Inside': 'Way High Inside',
+    'Way High': 'Way High',
+    'Way High & Outside': 'Way High Outside',
+    'Way Inside': 'Way Inside',
+    'Way Outside': 'Way Outside',
+    'Way Low & Inside': 'Way Low Inside',
+    'Way Low': 'Way Low',
+    'Way Low & Outside': 'Way Low Outside'
   };
 
   const resultMap: Record<string, 'Successful' | 'Unsuccessful'> = {
     'Strike': 'Successful',
-    'SwingStrike': 'Successful',
+    'Swinging Strike': 'Successful',
+    'Called Strike': 'Successful',
     'Foul': 'Successful',
-    'InPlay_Out': 'Successful',
+    'In Play - Out': 'Successful',
     'Ball': 'Unsuccessful',
-    'HBP': 'Unsuccessful',
-    'InPlay_Hit': 'Unsuccessful',
-    'InPlay_HR': 'Unsuccessful'
+    'Hit By Pitch': 'Unsuccessful',
+    'In Play - Hit': 'Unsuccessful',
+    'In Play - HR': 'Unsuccessful'
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,8 +110,8 @@ const DataUploader = () => {
 
     const header = lines[0].split(',').map(h => h.trim());
     
-    // Validate required columns
-    const requiredColumns = ['Date', 'PitchType', 'Location', 'Count', 'BatterSide', 'PitcherSide', 'Result'];
+    // Validate required columns for new schema
+    const requiredColumns = ['Date', 'Pitch Type', 'Location', 'Count', 'Batter Stands', 'Pitcher Throws', 'Result'];
     const missingColumns = requiredColumns.filter(col => !header.includes(col));
     
     if (missingColumns.length > 0) {
@@ -133,14 +138,14 @@ const DataUploader = () => {
       const [balls, strikes] = countStr.split('-').map(Number);
       
       // Get pitcher and batter handedness
-      const batterHandedness = values[columnIndices['BatterSide']] === 'R' ? 'Right' : 'Left';
-      const pitcherHandedness = values[columnIndices['PitcherSide']] === 'R' ? 'Right' : 'Left';
+      const batterHandedness = values[columnIndices['Batter Stands']] === 'R' ? 'Right' : 'Left';
+      const pitcherHandedness = values[columnIndices['Pitcher Throws']] === 'R' ? 'Right' : 'Left';
       
-      // Map pitch type from abbreviation to full name
-      const rawPitchType = values[columnIndices['PitchType']];
+      // Map pitch type from full name to internal type
+      const rawPitchType = values[columnIndices['Pitch Type']];
       const pitchType = pitchTypeMap[rawPitchType] || 'Fastball';
       
-      // Map location from abbreviation to full name
+      // Map location to internal location
       const rawLocation = values[columnIndices['Location']];
       const location = locationMap[rawLocation] || 'Middle Middle';
       
@@ -158,11 +163,12 @@ const DataUploader = () => {
         result,
         metadata: {
           date: values[columnIndices['Date']],
+          // Optional metadata fields based on availability
           pitcher: columnIndices['Pitcher'] !== undefined ? values[columnIndices['Pitcher']] : undefined,
-          velocity: columnIndices['Velo'] !== undefined ? parseFloat(values[columnIndices['Velo']]) : undefined,
-          spinRate: columnIndices['SpinRate'] !== undefined ? parseFloat(values[columnIndices['SpinRate']]) : undefined,
-          horizontalBreak: columnIndices['HorzBreak'] !== undefined ? parseFloat(values[columnIndices['HorzBreak']]) : undefined,
-          verticalBreak: columnIndices['VertBreak'] !== undefined ? parseFloat(values[columnIndices['VertBreak']]) : undefined,
+          velocity: columnIndices['Pitch Velocity'] !== undefined ? parseFloat(values[columnIndices['Pitch Velocity']]) : undefined,
+          spinRate: columnIndices['Spin Rate'] !== undefined ? parseFloat(values[columnIndices['Spin Rate']]) : undefined,
+          horizontalBreak: columnIndices['Horizontal Break'] !== undefined ? parseFloat(values[columnIndices['Horizontal Break']]) : undefined,
+          verticalBreak: columnIndices['Vertical Break'] !== undefined ? parseFloat(values[columnIndices['Vertical Break']]) : undefined,
         }
       };
       
@@ -229,7 +235,7 @@ const DataUploader = () => {
           <div className="flex justify-between items-center text-sm text-muted-foreground border-t pt-2">
             <span>Need the template?</span>
             <a
-              href="https://docs.google.com/spreadsheets/d/13EjHYv44jIW8Xqlfsg4wc-zsszhlWB0gVRfGal4mJ7g/edit?gid=1261395631#gid=1261395631"
+              href="https://docs.google.com/spreadsheets/d/1HoAL_4UZZB1-pa8fbaM0JuyjL21uadl98utT0tRrbiY/edit?gid=1930973159#gid=1930973159"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
