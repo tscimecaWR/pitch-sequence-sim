@@ -10,6 +10,29 @@ export interface PitchCoordinate {
   y: number;  // vertical position (0-1 normalized)
 }
 
+/**
+ * Coordinate Systems Units:
+ * 
+ * Statcast format (default):
+ *   - Horizontal (x): -2.5 to 2.5 feet from center of plate
+ *   - Vertical (z): 0 to 5 feet from ground
+ * 
+ * Trackman format:
+ *   - Horizontal (x): -1.5 to 1.5 feet from center
+ *   - Vertical (z): Typically 1.5 to 4 feet
+ * 
+ * Hawkeye format:
+ *   - Horizontal (x): -1.25 to 1.25 feet from center
+ *   - Vertical (z): Typically 1.75 to 4 feet
+ * 
+ * PlateLocSide/PlateLocHeight:
+ *   - Uses feet units for both horizontal and vertical measurements
+ *   - Handled similar to Trackman format
+ * 
+ * Normalized format:
+ *   - Both axes: 0 to 1 (already normalized)
+ */
+
 // Expanded coordinate boundaries to include "way" zones
 const ZONE_BOUNDARIES = {
   x: [0, 0.2, 0.4, 0.6, 0.8, 1.0],  // inside -> outside divisions
@@ -75,6 +98,7 @@ export function normalizeCoordinates(
     
     case 'trackman':
       // Trackman: x is -1.5 to 1.5 feet from center, y is typically 1.5 to 4 feet
+      // Also handles PlateLocSide/PlateLocHeight columns which use feet units
       return {
         x: (x + 1.5) / 3,
         y: (y - 1.5) / 2.5
