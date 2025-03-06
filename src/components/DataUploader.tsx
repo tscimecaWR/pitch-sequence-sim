@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -189,7 +188,8 @@ const DataUploader = () => {
     });
 
     const plateXColumn = header.includes('PlateX') ? 'PlateX' : 
-                      header.includes('plate_x') ? 'plate_x' : 'px';
+                      header.includes('plate_x') ? 'plate_x' : 
+                      header.includes('PlateLocSide') ? 'PlateLocSide' : 'px';
     
     const plateZColumn = header.includes('PlateZ') ? 'PlateZ' : 
                       header.includes('plate_z') ? 'plate_z' : 
