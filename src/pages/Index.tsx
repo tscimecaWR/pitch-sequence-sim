@@ -1,14 +1,17 @@
-
-import React, { useState } from 'react';
-import PitchInput from '@/components/PitchInput';
-import PitchHistory from '@/components/PitchHistory';
-import PitchRecommendation from '@/components/PitchRecommendation';
-import CountTracker from '@/components/CountTracker';
-import DataUploader from '@/components/DataUploader';
-import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '@/types/pitch';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from 'react';
+import PitchInput from '../components/pitch-input';
+import PitchHistory from '../components/PitchHistory';
+import PitchRecommendation from '../components/PitchRecommendation';
+import DataUploader from '../components/data-uploader';
+import CountTracker from '../components/CountTracker';
+import { Pitch, PitchType, PitchLocation, BatterHandedness, PitcherHandedness } from '../types/pitch';
+import { cn } from '@/lib/utils';
+import { setHistoricalPitchData } from '../utils/pitchRecommendation';
+import { importHistoricalData, HistoricalPitchData, debugState } from '../utils/dataBasedRecommendation';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { BookOpenCheck, Info } from 'lucide-react';
+import DebugHistoricalData from '../components/DebugHistoricalData';
 
 const Index = () => {
   const [pitches, setPitches] = useState<Pitch[]>([]);
@@ -18,6 +21,7 @@ const Index = () => {
   const [strikes, setStrikes] = useState<number>(0);
   const [batterHandedness, setBatterHandedness] = useState<BatterHandedness>('Right');
   const [pitcherHandedness, setPitcherHandedness] = useState<PitcherHandedness>('Right');
+  const [showDebug, setShowDebug] = useState(false);
 
   const handleAddPitch = (pitch: Pitch) => {
     const pitchWithCount = {
@@ -97,15 +101,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/50">
+    <div className="min-h-screen bg-background pb-20">
+      <header className="bg-primary text-primary-foreground py-4">
+        <div className="container">
+          <h1 className="text-2xl font-bold">Pitch Recommendation System</h1>
+          <p className="text-sm mt-1 opacity-90">Make better pitching decisions with data-driven insights</p>
+        </div>
+      </header>
+      
       <div className="container px-4 py-8 mx-auto">
-        <header className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Pitch Sequence Simulator</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Input your pitch data to receive intelligent recommendations for your next pitch based on sequence analysis.
-          </p>
-        </header>
-        
         <div className="max-w-6xl mx-auto mb-8">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xl font-medium">Current Count</h2>
@@ -156,6 +160,68 @@ const Index = () => {
               <PitchHistory pitches={pitches} />
             </div>
           </div>
+        </div>
+      </div>
+      
+      <div className="container mt-12 flex justify-end">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setShowDebug(!showDebug)}
+          className="flex items-center gap-1.5 text-xs"
+        >
+          <Info size={14} className={cn(showDebug ? "text-yellow-500" : "text-muted-foreground")} />
+          {showDebug ? "Hide Debug Data" : "Show Debug Data"}
+        </Button>
+      </div>
+      
+      {showDebug && (
+        <div className="container mt-2 mb-12">
+          <DebugHistoricalData 
+            historicalData={debugState.historicalData}
+            filteredData={debugState.relevantData}
+            typeScores={debugState.typeScores}
+            locationScores={debugState.locationScores}
+            insights={debugState.insights}
+            pitcherNames={debugState.pitcherNames}
+            currentSituation={debugState.currentSituation}
+          />
+        </div>
+      )}
+      
+      <div className="container mt-12">
+        <div className="flex items-center gap-2">
+          <BookOpenCheck size={18} className="text-primary" />
+          <h2 className="text-xl font-medium">How It Works</h2>
+        </div>
+        <Separator className="my-3" />
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <p>
+            Our Pitch Recommendation System combines traditional baseball strategy with data-driven insights to suggest the most effective pitches in any game situation.
+          </p>
+          <div className="flex flex-col gap-2 mt-4">
+            <div>
+              <h3 className="text-base font-medium">1. Situation Analysis</h3>
+              <p className="text-sm text-muted-foreground">The system analyzes the current count, batter/pitcher handedness, and previous pitches.</p>
+            </div>
+            <div>
+              <h3 className="text-base font-medium">2. Rule-Based Strategy</h3>
+              <p className="text-sm text-muted-foreground">Traditional baseball wisdom is applied, considering count, patterns, and matchups.</p>
+            </div>
+            <div>
+              <h3 className="text-base font-medium">3. Data Integration</h3>
+              <p className="text-sm text-muted-foreground">When available, historical pitch data is analyzed to find successful approaches in similar situations.</p>
+            </div>
+            <div>
+              <h3 className="text-base font-medium">4. Optimal Recommendation</h3>
+              <p className="text-sm text-muted-foreground">The system suggests the best pitch type and location, with insights explaining the recommendation.</p>
+            </div>
+          </div>
+          <p className="mt-4">
+            <a href="#" className="text-sm text-primary hover:underline">
+              Learn more about how our recommendation system works
+            </a>
+          </p>
         </div>
       </div>
     </div>

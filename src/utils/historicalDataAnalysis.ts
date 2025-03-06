@@ -20,11 +20,26 @@ const SAMPLE_DATA: HistoricalPitchData[] = [
   // More sample data would go here
 ];
 
+// Debug state object to expose internal state
+export const debugState = {
+  historicalData: SAMPLE_DATA,
+  relevantData: [] as HistoricalPitchData[],
+  currentSituation: {} as CurrentPitchSituation,
+  typeScores: {} as Record<PitchType, number>,
+  locationScores: {} as Record<PitchLocation, number>,
+  insights: [] as string[],
+  pitcherNames: [] as string[]
+};
+
 // Central function to get data-driven pitch recommendations
 export const getDataDrivenRecommendation = (
   currentSituation: CurrentPitchSituation,
   historicalData: HistoricalPitchData[] = SAMPLE_DATA
 ): DataDrivenRecommendationResult => {
+  // Update debug state
+  debugState.currentSituation = currentSituation;
+  debugState.historicalData = historicalData;
+  
   // Initialize scores
   const typeScores: Record<PitchType, number> = {
     'Fastball': 0, 'Curveball': 0, 'Slider': 0, 'Changeup': 0,
@@ -59,8 +74,15 @@ export const getDataDrivenRecommendation = (
     return countMatch && handednessMatch;
   });
   
+  // Update debug state with filtered data
+  debugState.relevantData = relevantData;
+  
   if (relevantData.length === 0) {
     insights.push("Not enough historical data for this exact situation");
+    debugState.insights = insights;
+    debugState.typeScores = typeScores;
+    debugState.locationScores = locationScores;
+    debugState.pitcherNames = pitcherNames;
     return { typeScores, locationScores, insights, pitcherNames };
   }
 
@@ -151,6 +173,12 @@ export const getDataDrivenRecommendation = (
       insights.push(`${pitcherNames.length} pitchers have had success with this approach`);
     }
   }
+  
+  // Update debug state before returning
+  debugState.typeScores = typeScores;
+  debugState.locationScores = locationScores;
+  debugState.insights = insights;
+  debugState.pitcherNames = pitcherNames;
   
   return { typeScores, locationScores, insights, pitcherNames };
 };
